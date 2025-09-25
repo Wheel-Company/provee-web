@@ -169,9 +169,11 @@ const GuestActions: React.FC = () => {
 const Navigation: React.FC<{ userRole?: 'customer' | 'expert' }> = ({ userRole }) => {
   return (
     <nav className="hidden lg:flex items-center space-x-8">
-      <Button variant="ghost" className="text-gray-700 hover:text-blue-600">
-        서비스 찾기
-      </Button>
+      <Link href="/search">
+        <Button variant="ghost" className="text-gray-700 hover:text-blue-600">
+          서비스 찾기
+        </Button>
+      </Link>
       {userRole === 'customer' && (
         <>
           <Button variant="ghost" className="text-gray-700 hover:text-blue-600">

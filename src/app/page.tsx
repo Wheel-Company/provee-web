@@ -101,7 +101,9 @@ export default function HomePage() {
 
   const handleSearch = () => {
     if (searchQuery.trim()) {
-      router.push('/request')
+      router.push(`/search?q=${encodeURIComponent(searchQuery)}`)
+    } else {
+      router.push('/search')
     }
   }
 
@@ -357,7 +359,7 @@ export default function HomePage() {
             <Button
               size="lg"
               className="bg-white text-blue-600 hover:bg-gray-100 px-8"
-              onClick={() => router.push('/request')}
+              onClick={() => router.push('/search')}
             >
               서비스 찾기
             </Button>
