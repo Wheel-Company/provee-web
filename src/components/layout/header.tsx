@@ -1,11 +1,11 @@
 'use client'
 
 import React, { useState } from 'react'
+import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
-import { TrustIndicator } from '@/components/provee/trust-indicator'
 import {
   Search,
   Bell,
@@ -23,10 +23,9 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu'
-import { User as UserType } from '@/types'
+import { useUser } from '@/hooks/useUser'
 
 interface HeaderProps {
-  user?: UserType | null
   onMenuToggle?: () => void
   variant?: 'default' | 'simple'
 }
@@ -84,8 +83,11 @@ const SearchBar: React.FC = () => {
   )
 }
 
-const UserMenu: React.FC<{ user: UserType }> = ({ user }) => {
+const UserMenu: React.FC = () => {
+  const { profile, signOut } = useUser()
   const [notificationCount] = useState(3)
+
+  if (!profile) return null
 
   return (
     <div className="flex items-center space-x-4">
@@ -102,18 +104,9 @@ const UserMenu: React.FC<{ user: UserType }> = ({ user }) => {
         )}
       </Button>
 
-      {/* 신뢰도 표시 */}
-      <div className="hidden md:block">
-        <TrustIndicator
-          type="verified"
-          score={95}
-          label="신뢰도"
-        />
-      </div>
-
       {/* 역할 배지 */}
-      <Badge variant={user.role === 'provider' ? 'default' : 'secondary'}>
-        {user.role === 'provider' ? '전문가' : '고객'}
+      <Badge variant={profile.user_type === 'expert' ? 'default' : 'secondary'}>
+        {profile.user_type === 'expert' ? '전문가' : '고객'}
       </Badge>
 
       {/* 프로필 드롭다운 */}
@@ -121,11 +114,10 @@ const UserMenu: React.FC<{ user: UserType }> = ({ user }) => {
         <DropdownMenuTrigger asChild>
           <Button variant="ghost" className="flex items-center space-x-2 p-1">
             <Avatar className="h-8 w-8">
-              <AvatarImage src={user.avatar} alt={user.name} />
-              <AvatarFallback>{user.name.charAt(0)}</AvatarFallback>
+              <AvatarFallback>{profile.name?.charAt(0) || 'U'}</AvatarFallback>
             </Avatar>
             <span className="hidden md:block text-sm font-medium">
-              {user.name}
+              {profile.name || profile.username}
             </span>
             <ChevronDown className="w-4 h-4" />
           </Button>
@@ -136,15 +128,11 @@ const UserMenu: React.FC<{ user: UserType }> = ({ user }) => {
             프로필
           </DropdownMenuItem>
           <DropdownMenuItem>
-            <Shield className="w-4 h-4 mr-2" />
-            신뢰 관리
-          </DropdownMenuItem>
-          <DropdownMenuItem>
             <Settings className="w-4 h-4 mr-2" />
             설정
           </DropdownMenuItem>
           <DropdownMenuSeparator />
-          <DropdownMenuItem>
+          <DropdownMenuItem onClick={signOut}>
             <LogOut className="w-4 h-4 mr-2" />
             로그아웃
           </DropdownMenuItem>
@@ -157,10 +145,14 @@ const UserMenu: React.FC<{ user: UserType }> = ({ user }) => {
 const GuestActions: React.FC = () => {
   return (
     <div className="flex items-center space-x-3">
-      <Button variant="ghost" size="sm">
-        로그인
-      </Button>
-      <Button size="sm">회원가입</Button>
+      <Link href="/auth/login">
+        <Button variant="ghost" size="sm">
+          로그인
+        </Button>
+      </Link>
+      <Link href="/auth/register">
+        <Button size="sm">회원가입</Button>
+      </Link>
     </div>
   )
 }
@@ -208,12 +200,26 @@ const SimpleHeader: React.FC = () => {
 }
 
 const Header: React.FC<HeaderProps> = ({
-  user,
   onMenuToggle,
   variant = 'default'
 }) => {
+  const { user, profile, loading } = useUser()
+
   if (variant === 'simple') {
     return <SimpleHeader />
+  }
+
+  if (loading) {
+    return (
+      <header className="bg-white border-b border-gray-200 shadow-sm sticky top-0 z-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between h-16">
+            <ProveeLogoIcon size="md" showText />
+            <div className="animate-pulse">로딩 중...</div>
+          </div>
+        </div>
+      </header>
+    )
   }
 
   return (
@@ -233,10 +239,12 @@ const Header: React.FC<HeaderProps> = ({
               </Button>
             )}
 
-            <ProveeLogoIcon size="md" showText />
+            <Link href="/">
+              <ProveeLogoIcon size="md" showText />
+            </Link>
 
             <div className="ml-8">
-              <Navigation userRole={user?.role} />
+              <Navigation userRole={profile?.user_type as 'customer' | 'expert'} />
             </div>
           </div>
 
@@ -246,7 +254,7 @@ const Header: React.FC<HeaderProps> = ({
           {/* 오른쪽: 사용자 정보 또는 로그인 버튼 */}
           <div className="flex items-center">
             {user ? (
-              <UserMenu user={user} />
+              <UserMenu />
             ) : (
               <GuestActions />
             )}
