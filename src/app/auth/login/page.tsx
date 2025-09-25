@@ -30,20 +30,16 @@ export default function LoginPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
 
-    console.log('로그인 시도 시작:', username)
     setIsLoading(true)
     setErrorMessage('')
 
     try {
       // 1. username으로 profiles 테이블에서 사용자 조회
-      console.log('프로필 조회 시작')
       const { data: profile, error: profileError } = await supabase
         .from('profiles')
         .select('*')
         .eq('username', username)
         .single()
-
-      console.log('프로필 조회 완료:', { profile: !!profile, error: profileError?.message })
 
       if (profileError || !profile) {
         setErrorMessage('아이디 또는 비밀번호가 올바르지 않습니다.')
