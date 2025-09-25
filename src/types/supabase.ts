@@ -12,46 +12,89 @@ export type Database = {
   __InternalSupabase: {
     PostgrestVersion: "13.0.5"
   }
+  graphql_public: {
+    Tables: {
+      [_ in never]: never
+    }
+    Views: {
+      [_ in never]: never
+    }
+    Functions: {
+      graphql: {
+        Args: {
+          extensions?: Json
+          operationName?: string
+          query?: string
+          variables?: Json
+        }
+        Returns: Json
+      }
+    }
+    Enums: {
+      [_ in never]: never
+    }
+    CompositeTypes: {
+      [_ in never]: never
+    }
+  }
   public: {
     Tables: {
       experts: {
         Row: {
+          category: Database["public"]["Enums"]["service_category"][] | null
+          completed_projects: number | null
           created_at: string
           description: string | null
+          experience_years: number | null
+          hourly_rate: number | null
           id: string
+          is_available: boolean | null
           location: string
           portfolio_images: string[] | null
           price_max: number
           price_min: number
           rating: number | null
+          response_time_hours: number | null
           review_count: number | null
           services: string[]
           updated_at: string
           verified: boolean | null
         }
         Insert: {
+          category?: Database["public"]["Enums"]["service_category"][] | null
+          completed_projects?: number | null
           created_at?: string
           description?: string | null
+          experience_years?: number | null
+          hourly_rate?: number | null
           id: string
+          is_available?: boolean | null
           location: string
           portfolio_images?: string[] | null
           price_max?: number
           price_min?: number
           rating?: number | null
+          response_time_hours?: number | null
           review_count?: number | null
           services?: string[]
           updated_at?: string
           verified?: boolean | null
         }
         Update: {
+          category?: Database["public"]["Enums"]["service_category"][] | null
+          completed_projects?: number | null
           created_at?: string
           description?: string | null
+          experience_years?: number | null
+          hourly_rate?: number | null
           id?: string
+          is_available?: boolean | null
           location?: string
           portfolio_images?: string[] | null
           price_max?: number
           price_min?: number
           rating?: number | null
+          response_time_hours?: number | null
           review_count?: number | null
           services?: string[]
           updated_at?: string
@@ -73,8 +116,11 @@ export type Database = {
           customer_id: string
           expert_id: string
           id: string
+          location_score: number | null
           match_score: number
+          price_score: number | null
           request_id: string
+          service_score: number | null
           status: Database["public"]["Enums"]["match_status"] | null
           updated_at: string
         }
@@ -83,8 +129,11 @@ export type Database = {
           customer_id: string
           expert_id: string
           id?: string
+          location_score?: number | null
           match_score: number
+          price_score?: number | null
           request_id: string
+          service_score?: number | null
           status?: Database["public"]["Enums"]["match_status"] | null
           updated_at?: string
         }
@@ -93,8 +142,11 @@ export type Database = {
           customer_id?: string
           expert_id?: string
           id?: string
+          location_score?: number | null
           match_score?: number
+          price_score?: number | null
           request_id?: string
+          service_score?: number | null
           status?: Database["public"]["Enums"]["match_status"] | null
           updated_at?: string
         }
@@ -125,6 +177,7 @@ export type Database = {
       profiles: {
         Row: {
           created_at: string
+          district: string | null
           email: string
           id: string
           name: string
@@ -134,6 +187,7 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          district?: string | null
           email: string
           id?: string
           name: string
@@ -143,6 +197,7 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          district?: string | null
           email?: string
           id?: string
           name?: string
@@ -156,7 +211,7 @@ export type Database = {
         Row: {
           budget_max: number
           budget_min: number
-          category: string
+          category: Database["public"]["Enums"]["service_category"]
           created_at: string
           customer_id: string
           description: string
@@ -169,7 +224,7 @@ export type Database = {
         Insert: {
           budget_max: number
           budget_min: number
-          category: string
+          category?: Database["public"]["Enums"]["service_category"]
           created_at?: string
           customer_id: string
           description: string
@@ -182,7 +237,7 @@ export type Database = {
         Update: {
           budget_max?: number
           budget_min?: number
-          category?: string
+          category?: Database["public"]["Enums"]["service_category"]
           created_at?: string
           customer_id?: string
           description?: string
@@ -207,11 +262,28 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      calculate_match_score: {
+        Args: {
+          expert_category: Database["public"]["Enums"]["service_category"][]
+          expert_location: string
+          expert_price_max: number
+          expert_price_min: number
+          request_budget_max: number
+          request_budget_min: number
+          request_category: Database["public"]["Enums"]["service_category"]
+          request_location: string
+        }
+        Returns: number
+      }
+      create_matches_for_request: {
+        Args: { request_id: string }
+        Returns: undefined
+      }
     }
     Enums: {
       match_status: "pending" | "accepted" | "declined" | "completed"
       request_status: "pending" | "matched" | "completed" | "cancelled"
+      service_category: "청소" | "수리" | "과외" | "디자인"
       user_type: "customer" | "expert"
     }
     CompositeTypes: {
@@ -338,10 +410,14 @@ export type CompositeTypes<
     : never
 
 export const Constants = {
+  graphql_public: {
+    Enums: {},
+  },
   public: {
     Enums: {
       match_status: ["pending", "accepted", "declined", "completed"],
       request_status: ["pending", "matched", "completed", "cancelled"],
+      service_category: ["청소", "수리", "과외", "디자인"],
       user_type: ["customer", "expert"],
     },
   },

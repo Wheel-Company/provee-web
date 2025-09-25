@@ -1,179 +1,254 @@
+'use client'
+
 import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
-import { Header } from '@/components/layout/header'
-import { Footer } from '@/components/layout/footer'
-import { ServiceMatchCard } from '@/components/provee/service-match-card'
-import { TrustIndicator } from '@/components/provee/trust-indicator'
-import { Search, UserCheck, Shield, Zap, Star, Users } from 'lucide-react'
+import { Card } from '@/components/ui/card'
+import Link from 'next/link'
+import { useState } from 'react'
 
 export default function HomePage() {
+  const [selectedCategory, setSelectedCategory] = useState<string>('')
+  const [location, setLocation] = useState('')
+  const [budget, setBudget] = useState('')
+  const [description, setDescription] = useState('')
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
-      <Header />
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
+      {/* Header */}
+      <header className="bg-white shadow-sm">
+        <div className="max-w-7xl mx-auto px-6 py-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="text-2xl">🏠</div>
+              <div>
+                <h1 className="text-xl font-bold text-gray-900">Provee</h1>
+                <p className="text-sm text-gray-600">AI 기반 전문가 매칭 플랫폼</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-4">
+              <Link href="/expert">
+                <Button variant="outline">전문가 등록</Button>
+              </Link>
+              <Link href="/login">
+                <Button>로그인</Button>
+              </Link>
+            </div>
+          </div>
+        </div>
+      </header>
 
       {/* Hero Section */}
-      <section className="py-20 px-4">
-        <div className="max-w-7xl mx-auto text-center">
-          <h1 className="text-5xl font-bold text-gray-900 mb-6">
-            AI 기반 서비스 매칭 플랫폼
-            <span className="block text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-teal-600 mt-2">
-              Provee
-            </span>
-          </h1>
-          <p className="text-xl text-gray-600 mb-8 max-w-3xl mx-auto korean-text">
-            전문가와 고객 모두가 신뢰할 수 있는 AI 매칭 시스템으로
-            완벽한 서비스 파트너를 찾아보세요
-          </p>
-          <div className="flex gap-4 justify-center flex-wrap">
-            <Button size="lg" className="bg-gradient-to-r from-blue-600 to-teal-600">
-              서비스 찾기 <Search className="ml-2 h-5 w-5" />
-            </Button>
-            <Button size="lg" variant="outline">
-              전문가 등록하기 <UserCheck className="ml-2 h-5 w-5" />
-            </Button>
+      <section className="py-20">
+        <div className="max-w-7xl mx-auto px-6">
+          <div className="grid lg:grid-cols-2 gap-12 items-center">
+            {/* Left Content */}
+            <div>
+              <h2 className="text-5xl font-bold text-gray-900 mb-6">
+                AI가 찾아주는<br />
+                <span className="text-blue-600">맞춤 전문가</span>
+              </h2>
+              <p className="text-xl text-gray-600 mb-8">
+                3분만에 전문가 5명을 추천받고,<br />
+                최적의 서비스 파트너를 만나보세요
+              </p>
+
+              {/* Stats */}
+              <div className="grid grid-cols-3 gap-6 mb-8">
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-blue-600">3분</div>
+                  <div className="text-sm text-gray-600">빠른 매칭</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-green-600">87%</div>
+                  <div className="text-sm text-gray-600">매칭 성공률</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-purple-600">4.8★</div>
+                  <div className="text-sm text-gray-600">평균 만족도</div>
+                </div>
+              </div>
+            </div>
+
+            {/* Right Form */}
+            <div>
+              <Card className="p-8 shadow-lg">
+                <h3 className="text-2xl font-semibold mb-6">
+                  어떤 서비스가 필요하세요?
+                </h3>
+
+                {/* Category Selection */}
+                <div className="mb-6">
+                  <label className="block text-sm font-medium text-gray-700 mb-3">
+                    카테고리 선택
+                  </label>
+                  <div className="grid grid-cols-2 gap-3">
+                    {['청소', '수리', '과외', '디자인'].map((category) => (
+                      <Button
+                        key={category}
+                        variant={selectedCategory === category ? "default" : "outline"}
+                        className="h-14 text-lg"
+                        onClick={() => setSelectedCategory(category)}
+                      >
+                        {category === '청소' && '🧹'}
+                        {category === '수리' && '🔧'}
+                        {category === '과외' && '📚'}
+                        {category === '디자인' && '🎨'} {category}
+                      </Button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Location & Budget Row */}
+                <div className="grid grid-cols-2 gap-4 mb-6">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      지역
+                    </label>
+                    <select
+                      className="w-full p-3 border border-gray-300 rounded-md"
+                      value={location}
+                      onChange={(e) => setLocation(e.target.value)}
+                    >
+                      <option value="">지역 선택</option>
+                      <option value="강남구">서울 강남구</option>
+                      <option value="강북구">서울 강북구</option>
+                      <option value="서초구">서울 서초구</option>
+                      <option value="송파구">서울 송파구</option>
+                      <option value="영등포구">서울 영등포구</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      예산
+                    </label>
+                    <select
+                      className="w-full p-3 border border-gray-300 rounded-md"
+                      value={budget}
+                      onChange={(e) => setBudget(e.target.value)}
+                    >
+                      <option value="">예산 범위</option>
+                      <option value="10-30">10-30만원</option>
+                      <option value="30-50">30-50만원</option>
+                      <option value="50-100">50-100만원</option>
+                      <option value="100+">100만원 이상</option>
+                    </select>
+                  </div>
+                </div>
+
+                {/* Request Details */}
+                <div className="mb-8">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    요청 내용
+                  </label>
+                  <textarea
+                    className="w-full p-4 border border-gray-300 rounded-md h-32 resize-none"
+                    placeholder="구체적인 요청 내용을 입력해주세요..."
+                    value={description}
+                    onChange={(e) => setDescription(e.target.value)}
+                  />
+                </div>
+
+                {/* CTA Button */}
+                <Link href={`/matching?category=${selectedCategory}&location=${location}&budget=${budget}&description=${description}`}>
+                  <Button
+                    className="w-full h-14 text-lg font-semibold"
+                    disabled={!selectedCategory || !location || !budget}
+                  >
+                    전문가 찾기 🚀
+                  </Button>
+                </Link>
+              </Card>
+            </div>
           </div>
         </div>
       </section>
 
-      {/* Features Section */}
-      <section className="py-16 px-4 bg-white">
-        <div className="max-w-7xl mx-auto">
-          <h2 className="text-3xl font-bold text-center text-gray-900 mb-12">
-            왜 Provee를 선택해야 할까요?
-          </h2>
+      {/* How it works */}
+      <section className="py-16 bg-white">
+        <div className="max-w-7xl mx-auto px-6">
+          <div className="text-center mb-12">
+            <h3 className="text-3xl font-bold text-gray-900 mb-4">이용 방법</h3>
+            <p className="text-lg text-gray-600">간단한 3단계로 최적의 전문가를 만나보세요</p>
+          </div>
+
           <div className="grid md:grid-cols-3 gap-8">
-            <Card className="text-center">
-              <CardHeader>
-                <Shield className="h-12 w-12 text-blue-600 mx-auto mb-4" />
-                <CardTitle>신뢰할 수 있는 매칭</CardTitle>
-                <CardDescription className="korean-text">
-                  AI가 70% 이상 호환성을 보장하는 전문가만 추천
-                </CardDescription>
-              </CardHeader>
-            </Card>
-            <Card className="text-center">
-              <CardHeader>
-                <Zap className="h-12 w-12 text-teal-600 mx-auto mb-4" />
-                <CardTitle>빠른 매칭</CardTitle>
-                <CardDescription className="korean-text">
-                  평균 24시간 내 최적의 전문가 매칭
-                </CardDescription>
-              </CardHeader>
-            </Card>
-            <Card className="text-center">
-              <CardHeader>
-                <Star className="h-12 w-12 text-yellow-500 mx-auto mb-4" />
-                <CardTitle>결과 보장</CardTitle>
-                <CardDescription className="korean-text">
-                  만족하지 못하면 100% 환불 보장
-                </CardDescription>
-              </CardHeader>
-            </Card>
-          </div>
-        </div>
-      </section>
-
-      {/* Sample Matches Section */}
-      <section className="py-16 px-4 bg-gray-50">
-        <div className="max-w-7xl mx-auto">
-          <h2 className="text-3xl font-bold text-center text-gray-900 mb-12">
-            최근 성공적인 매칭 사례
-          </h2>
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            <ServiceMatchCard
-              title="웹사이트 개발"
-              category="개발"
-              price="500,000원"
-              duration="2주"
-              matchScore={92}
-              providerName="김개발"
-              providerRating={4.9}
-              skills={["React", "Node.js", "AWS"]}
-              description="반응형 웹사이트 개발 및 배포"
-            />
-            <ServiceMatchCard
-              title="브랜드 로고 디자인"
-              category="디자인"
-              price="200,000원"
-              duration="1주"
-              matchScore={88}
-              providerName="이디자이너"
-              providerRating={4.8}
-              skills={["Illustrator", "브랜딩", "UI/UX"]}
-              description="기업 로고 및 브랜드 아이덴티티 디자인"
-            />
-            <ServiceMatchCard
-              title="마케팅 컨설팅"
-              category="마케팅"
-              price="1,000,000원"
-              duration="1개월"
-              matchScore={85}
-              providerName="박마케터"
-              providerRating={4.7}
-              skills={["SEO", "광고", "분석"]}
-              description="디지털 마케팅 전략 수립 및 실행"
-            />
-          </div>
-        </div>
-      </section>
-
-      {/* Trust Indicators */}
-      <section className="py-16 px-4 bg-white">
-        <div className="max-w-7xl mx-auto">
-          <h2 className="text-3xl font-bold text-center text-gray-900 mb-12">
-            검증된 전문가들
-          </h2>
-          <div className="flex justify-center gap-8 flex-wrap">
-            <TrustIndicator
-              type="verified"
-              score={95}
-              label="신원 인증"
-            />
-            <TrustIndicator
-              type="portfolio"
-              score={88}
-              label="포트폴리오 검증"
-            />
-            <TrustIndicator
-              type="review"
-              score={4.8}
-              label="평균 평점"
-            />
-            <TrustIndicator
-              type="response"
-              score={2.3}
-              label="평균 응답시간 (시간)"
-            />
-          </div>
-        </div>
-      </section>
-
-      {/* Stats Section */}
-      <section className="py-16 px-4 bg-gradient-to-r from-blue-600 to-teal-600 text-white">
-        <div className="max-w-7xl mx-auto">
-          <div className="grid md:grid-cols-4 gap-8 text-center">
-            <div>
-              <div className="text-4xl font-bold mb-2">10,000+</div>
-              <div className="text-blue-100">등록된 전문가</div>
+            <div className="text-center">
+              <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <span className="text-2xl">✏️</span>
+              </div>
+              <h4 className="text-xl font-semibold mb-2">1. 요청 작성</h4>
+              <p className="text-gray-600">필요한 서비스와 조건을 입력하세요 (3분)</p>
             </div>
-            <div>
-              <div className="text-4xl font-bold mb-2">50,000+</div>
-              <div className="text-blue-100">완료된 프로젝트</div>
+
+            <div className="text-center">
+              <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <span className="text-2xl">🤖</span>
+              </div>
+              <h4 className="text-xl font-semibold mb-2">2. AI 매칭</h4>
+              <p className="text-gray-600">AI가 최적의 전문가 5명을 추천합니다 (2분)</p>
             </div>
-            <div>
-              <div className="text-4xl font-bold mb-2">4.8/5</div>
-              <div className="text-blue-100">평균 만족도</div>
-            </div>
-            <div>
-              <div className="text-4xl font-bold mb-2">92%</div>
-              <div className="text-blue-100">매칭 성공률</div>
+
+            <div className="text-center">
+              <div className="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <span className="text-2xl">📞</span>
+              </div>
+              <h4 className="text-xl font-semibold mb-2">3. 전문가 연락</h4>
+              <p className="text-gray-600">마음에 드는 전문가에게 바로 연락하세요 (1분)</p>
             </div>
           </div>
         </div>
       </section>
 
-      <Footer />
+      {/* Footer */}
+      <footer className="bg-gray-900 text-white py-12">
+        <div className="max-w-7xl mx-auto px-6">
+          <div className="grid md:grid-cols-4 gap-8">
+            <div>
+              <div className="flex items-center gap-2 mb-4">
+                <span className="text-xl">🏠</span>
+                <span className="font-bold text-xl">Provee</span>
+              </div>
+              <p className="text-gray-400">
+                AI 기반 전문가 매칭 플랫폼
+              </p>
+            </div>
+
+            <div>
+              <h4 className="font-semibold mb-4">서비스</h4>
+              <ul className="space-y-2 text-gray-400">
+                <li>청소 서비스</li>
+                <li>수리 서비스</li>
+                <li>과외 서비스</li>
+                <li>디자인 서비스</li>
+              </ul>
+            </div>
+
+            <div>
+              <h4 className="font-semibold mb-4">회사</h4>
+              <ul className="space-y-2 text-gray-400">
+                <li>회사 소개</li>
+                <li>서비스 소개</li>
+                <li>채용 정보</li>
+                <li>문의하기</li>
+              </ul>
+            </div>
+
+            <div>
+              <h4 className="font-semibold mb-4">지원</h4>
+              <ul className="space-y-2 text-gray-400">
+                <li>고객 센터</li>
+                <li>이용 가이드</li>
+                <li>자주 묻는 질문</li>
+                <li>개인정보 처리방침</li>
+              </ul>
+            </div>
+          </div>
+
+          <div className="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400">
+            <p>&copy; 2024 Provee. All rights reserved.</p>
+          </div>
+        </div>
+      </footer>
     </div>
   )
 }
