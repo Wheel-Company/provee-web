@@ -123,14 +123,18 @@ const UserMenu: React.FC = () => {
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end" className="w-48">
-          <DropdownMenuItem>
-            <User className="w-4 h-4 mr-2" />
-            프로필
-          </DropdownMenuItem>
-          <DropdownMenuItem>
-            <Settings className="w-4 h-4 mr-2" />
-            설정
-          </DropdownMenuItem>
+          <Link href="/profile">
+            <DropdownMenuItem>
+              <User className="w-4 h-4 mr-2" />
+              프로필
+            </DropdownMenuItem>
+          </Link>
+          <Link href="/profile/settings">
+            <DropdownMenuItem>
+              <Settings className="w-4 h-4 mr-2" />
+              설정
+            </DropdownMenuItem>
+          </Link>
           <DropdownMenuSeparator />
           <DropdownMenuItem onClick={signOut}>
             <LogOut className="w-4 h-4 mr-2" />
