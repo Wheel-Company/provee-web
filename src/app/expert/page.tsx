@@ -3,7 +3,22 @@
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
+import { Header } from '@/components/layout/header'
 import Link from 'next/link'
+import {
+  TrendingUp,
+  Star,
+  Clock,
+  Users,
+  DollarSign,
+  Calendar,
+  Settings,
+  BarChart3,
+  MessageSquare,
+  Award,
+  AlertCircle,
+  CheckCircle
+} from 'lucide-react'
 
 // Mock data for expert dashboard
 const mockRequests = [
@@ -53,55 +68,86 @@ const mockStats = {
 export default function ExpertDashboard() {
   return (
     <div className="min-h-screen bg-gray-50">
-      <div className="max-w-md mx-auto p-6">
+      <Header />
+
+      <div className="max-w-7xl mx-auto px-4 py-6">
         {/* Header */}
-        <div className="flex justify-between items-center mb-6">
-          <div>
-            <h1 className="text-xl font-bold text-gray-900">전문가 대시보드</h1>
-            <p className="text-sm text-gray-600">김전문님, 안녕하세요!</p>
-          </div>
-          <Link href="/">
-            <Button variant="outline" size="sm">
-              홈으로
-            </Button>
-          </Link>
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">전문가 대시보드</h1>
+          <p className="text-gray-600">김전문님, 오늘도 좋은 서비스로 고객들을 만족시켜 보세요!</p>
         </div>
 
-        {/* Quick Stats */}
-        <Card className="p-4 mb-6">
-          <h2 className="font-semibold text-gray-900 mb-3">📊 이번 달 현황</h2>
-          <div className="grid grid-cols-2 gap-4 text-center">
-            <div>
-              <div className="text-2xl font-bold text-blue-600">{mockStats.thisMonth.matches}건</div>
-              <div className="text-sm text-gray-600">매칭</div>
-            </div>
-            <div>
-              <div className="text-2xl font-bold text-green-600">
-                {(mockStats.thisMonth.revenue / 10000).toFixed(0)}만원
+        {/* Stats Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+          <Card className="p-6">
+            <div className="flex items-center">
+              <div className="p-3 bg-blue-100 rounded-lg mr-4">
+                <Users className="w-8 h-8 text-blue-600" />
               </div>
-              <div className="text-sm text-gray-600">수입</div>
+              <div>
+                <p className="text-sm text-gray-600">이번 달 매칭</p>
+                <p className="text-3xl font-bold text-gray-900">{mockStats.thisMonth.matches}</p>
+                <p className="text-sm text-green-600 font-medium">+20% vs 지난달</p>
+              </div>
             </div>
-            <div>
-              <div className="text-2xl font-bold text-yellow-600">{mockStats.thisMonth.rating}</div>
-              <div className="text-sm text-gray-600">평균 평점</div>
-            </div>
-            <div>
-              <div className="text-2xl font-bold text-purple-600">{mockStats.thisMonth.responseRate}%</div>
-              <div className="text-sm text-gray-600">응답률</div>
-            </div>
-          </div>
-        </Card>
+          </Card>
 
-        {/* New Requests */}
-        <Card className="p-4 mb-6">
-          <div className="flex justify-between items-center mb-4">
-            <h2 className="font-semibold text-gray-900">
-              🆕 새 요청 ({mockRequests.length}건)
-            </h2>
-            <Badge variant="secondary" className="bg-red-100 text-red-700">
-              NEW
-            </Badge>
-          </div>
+          <Card className="p-6">
+            <div className="flex items-center">
+              <div className="p-3 bg-green-100 rounded-lg mr-4">
+                <DollarSign className="w-8 h-8 text-green-600" />
+              </div>
+              <div>
+                <p className="text-sm text-gray-600">이번 달 수입</p>
+                <p className="text-3xl font-bold text-gray-900">
+                  {(mockStats.thisMonth.revenue / 10000).toFixed(0)}만원
+                </p>
+                <p className="text-sm text-green-600 font-medium">+15% vs 지난달</p>
+              </div>
+            </div>
+          </Card>
+
+          <Card className="p-6">
+            <div className="flex items-center">
+              <div className="p-3 bg-yellow-100 rounded-lg mr-4">
+                <Star className="w-8 h-8 text-yellow-600" />
+              </div>
+              <div>
+                <p className="text-sm text-gray-600">평균 평점</p>
+                <p className="text-3xl font-bold text-gray-900">{mockStats.thisMonth.rating}</p>
+                <p className="text-sm text-green-600 font-medium">+0.2 vs 지난달</p>
+              </div>
+            </div>
+          </Card>
+
+          <Card className="p-6">
+            <div className="flex items-center">
+              <div className="p-3 bg-purple-100 rounded-lg mr-4">
+                <Clock className="w-8 h-8 text-purple-600" />
+              </div>
+              <div>
+                <p className="text-sm text-gray-600">응답률</p>
+                <p className="text-3xl font-bold text-gray-900">{mockStats.thisMonth.responseRate}%</p>
+                <p className="text-sm text-green-600 font-medium">+5% vs 지난달</p>
+              </div>
+            </div>
+          </Card>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          {/* Main Content - Left Side */}
+          <div className="lg:col-span-2 space-y-8">
+            {/* New Requests */}
+            <Card className="p-6">
+              <div className="flex justify-between items-center mb-6">
+                <h2 className="text-xl font-semibold text-gray-900 flex items-center">
+                  <AlertCircle className="w-5 h-5 mr-2 text-blue-600" />
+                  새로운 견적 요청 ({mockRequests.length}건)
+                </h2>
+                <Badge variant="secondary" className="bg-red-100 text-red-700">
+                  NEW
+                </Badge>
+              </div>
 
           <div className="space-y-3">
             {mockRequests.map((request) => (
@@ -166,54 +212,98 @@ export default function ExpertDashboard() {
           </div>
         </Card>
 
-        {/* Active Projects */}
-        <Card className="p-4 mb-6">
-          <h2 className="font-semibold text-gray-900 mb-3">🔄 진행 중인 프로젝트</h2>
-          <div className="space-y-2">
-            <div className="flex justify-between items-center p-2 bg-blue-50 rounded">
-              <div>
-                <div className="font-medium text-sm">강남구 아파트 청소</div>
-                <div className="text-xs text-gray-600">진행률: 50% • 마감: 2일 후</div>
-              </div>
-              <Badge variant="outline" className="text-xs">
-                진행중
-              </Badge>
-            </div>
-            <div className="flex justify-between items-center p-2 bg-green-50 rounded">
-              <div>
-                <div className="font-medium text-sm">서초구 사무실 정기청소</div>
-                <div className="text-xs text-gray-600">다음 방문: 내일 오후 2시</div>
-              </div>
-              <Badge variant="outline" className="text-xs bg-green-100">
-                예정
-              </Badge>
-            </div>
+            </Card>
           </div>
-        </Card>
 
-        {/* Quick Actions */}
-        <div className="grid grid-cols-2 gap-4 mb-6">
-          <Link href="/expert/profile">
-            <Button variant="outline" className="w-full h-12">
-              ⚙️ 프로필 설정
-            </Button>
-          </Link>
-          <Link href="/expert/history">
-            <Button variant="outline" className="w-full h-12">
-              📈 실적 보기
-            </Button>
-          </Link>
+          {/* Right Sidebar */}
+          <div className="space-y-6">
+            {/* Quick Actions */}
+            <Card className="p-6">
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">빠른 액션</h3>
+              <div className="space-y-3">
+                <Link href="/profile/settings">
+                  <Button variant="outline" className="w-full justify-start">
+                    <Settings className="w-4 h-4 mr-2" />
+                    프로필 설정
+                  </Button>
+                </Link>
+                <Link href="/expert/history">
+                  <Button variant="outline" className="w-full justify-start">
+                    <BarChart3 className="w-4 h-4 mr-2" />
+                    실적 보기
+                  </Button>
+                </Link>
+                <Link href="/expert/schedule">
+                  <Button variant="outline" className="w-full justify-start">
+                    <Calendar className="w-4 h-4 mr-2" />
+                    일정 관리
+                  </Button>
+                </Link>
+                <Link href="/expert/messages">
+                  <Button variant="outline" className="w-full justify-start">
+                    <MessageSquare className="w-4 h-4 mr-2" />
+                    메시지 확인
+                  </Button>
+                </Link>
+              </div>
+            </Card>
+
+            {/* Active Projects */}
+            <Card className="p-6">
+              <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                <CheckCircle className="w-5 h-5 mr-2 text-green-600" />
+                진행 중인 프로젝트
+              </h3>
+              <div className="space-y-4">
+                <div className="border-l-4 border-blue-500 pl-4 py-2">
+                  <div className="font-medium text-gray-900">강남구 아파트 청소</div>
+                  <div className="text-sm text-gray-600 mb-2">진행률: 50% • 마감: 2일 후</div>
+                  <Badge variant="outline" className="text-xs">
+                    진행중
+                  </Badge>
+                </div>
+                <div className="border-l-4 border-green-500 pl-4 py-2">
+                  <div className="font-medium text-gray-900">서초구 사무실 정기청소</div>
+                  <div className="text-sm text-gray-600 mb-2">다음 방문: 내일 오후 2시</div>
+                  <Badge variant="outline" className="text-xs bg-green-100">
+                    예정
+                  </Badge>
+                </div>
+              </div>
+            </Card>
+
+            {/* Achievement Badge */}
+            <Card className="p-6 bg-gradient-to-br from-yellow-50 to-orange-50 border-yellow-200">
+              <div className="text-center">
+                <Award className="w-12 h-12 text-yellow-600 mx-auto mb-3" />
+                <h3 className="font-semibold text-yellow-900 mb-2">이달의 우수 전문가</h3>
+                <p className="text-sm text-yellow-800">고객 만족도 95% 달성!</p>
+              </div>
+            </Card>
+
+            {/* Tips */}
+            <Card className="p-6 bg-blue-50 border-blue-200">
+              <h3 className="font-semibold text-blue-900 mb-3 flex items-center">
+                <TrendingUp className="w-5 h-5 mr-2" />
+                매칭률 높이는 팁
+              </h3>
+              <ul className="text-sm text-blue-800 space-y-2">
+                <li className="flex items-start">
+                  <span className="w-2 h-2 bg-blue-600 rounded-full mt-2 mr-2 flex-shrink-0"></span>
+                  프로필을 상세히 작성하세요
+                </li>
+                <li className="flex items-start">
+                  <span className="w-2 h-2 bg-blue-600 rounded-full mt-2 mr-2 flex-shrink-0"></span>
+                  빠른 응답으로 신뢰도를 높이세요
+                </li>
+                <li className="flex items-start">
+                  <span className="w-2 h-2 bg-blue-600 rounded-full mt-2 mr-2 flex-shrink-0"></span>
+                  포트폴리오 사진을 추가하세요
+                </li>
+              </ul>
+            </Card>
+          </div>
         </div>
-
-        {/* Tips */}
-        <Card className="p-4 bg-yellow-50 border-yellow-200">
-          <h3 className="font-semibold text-yellow-900 mb-2">💡 매칭률 높이는 팁</h3>
-          <ul className="text-sm text-yellow-800 space-y-1">
-            <li>• 프로필을 상세히 작성하세요</li>
-            <li>• 빠른 응답으로 신뢰도를 높이세요</li>
-            <li>• 포트폴리오 사진을 추가하세요</li>
-          </ul>
-        </Card>
       </div>
     </div>
   )

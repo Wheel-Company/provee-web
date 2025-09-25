@@ -3,8 +3,20 @@
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
+import { Header } from '@/components/layout/header'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
+import {
+  Star,
+  MapPin,
+  Clock,
+  Award,
+  Shield,
+  Heart,
+  MessageSquare,
+  Phone,
+  ArrowLeft
+} from 'lucide-react'
 
 // Mock data for expert details
 const mockExpertData: { [key: string]: any } = {
@@ -75,34 +87,18 @@ export default function ExpertDetailPage({ params }: { params: { id: string } })
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <header className="bg-white shadow-sm">
-        <div className="max-w-7xl mx-auto px-6 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <Link href="/matching">
-                <Button variant="outline" size="sm">
-                  ← 목록으로
-                </Button>
-              </Link>
-              <div>
-                <h1 className="text-xl font-bold text-gray-900">Provee</h1>
-                <p className="text-sm text-gray-600">전문가 상세</p>
-              </div>
-            </div>
-            <div className="flex items-center gap-4">
-              <Link href="/expert">
-                <Button variant="outline">전문가 등록</Button>
-              </Link>
-              <Link href="/login">
-                <Button>로그인</Button>
-              </Link>
-            </div>
-          </div>
-        </div>
-      </header>
+      <Header />
 
       <div className="max-w-6xl mx-auto px-6 py-8">
+        {/* Breadcrumb */}
+        <div className="flex items-center space-x-2 text-sm text-gray-600 mb-6">
+          <Link href="/search" className="hover:text-blue-600">
+            서비스 찾기
+          </Link>
+          <span>/</span>
+          <span className="text-gray-900 font-medium">전문가 상세</span>
+        </div>
+
         <div className="grid lg:grid-cols-3 gap-8">
           {/* Main Content - Left Side */}
           <div className="lg:col-span-2 space-y-6">
@@ -110,31 +106,47 @@ export default function ExpertDetailPage({ params }: { params: { id: string } })
             <Card className="p-8">
               <div className="flex items-start justify-between mb-6">
                 <div className="flex items-center gap-6">
-                  <div className="w-20 h-20 bg-blue-100 rounded-full flex items-center justify-center text-3xl">
-                    👤
+                  <div className="w-20 h-20 bg-gradient-to-br from-blue-400 to-purple-500 rounded-full flex items-center justify-center text-white text-2xl font-bold">
+                    {expert.name.charAt(0)}
                   </div>
                   <div>
                     <div className="flex items-center gap-3 mb-2">
                       <h1 className="text-3xl font-bold text-gray-900">{expert.name}</h1>
                       {expert.verified && (
-                        <Badge variant="secondary" className="bg-green-100 text-green-800">
-                          ✅ 인증 전문가
+                        <Badge variant="secondary" className="bg-green-100 text-green-800 flex items-center gap-1">
+                          <Shield className="w-3 h-3" />
+                          인증 전문가
                         </Badge>
                       )}
                     </div>
                     <div className="flex items-center gap-2 text-lg text-gray-600 mb-2">
                       <div className="flex">
                         {[...Array(5)].map((_, i) => (
-                          <span key={i} className={i < Math.floor(expert.rating) ? 'text-yellow-400' : 'text-gray-300'}>
-                            ⭐
-                          </span>
+                          <Star key={i} className={`w-5 h-5 ${i < Math.floor(expert.rating) ? 'text-yellow-400 fill-current' : 'text-gray-300'}`} />
                         ))}
                       </div>
                       <span className="font-semibold">{expert.rating}</span>
                       <span>(리뷰 {expert.reviewCount}개)</span>
                     </div>
+                    <div className="flex items-center gap-4 text-sm text-gray-600">
+                      <div className="flex items-center gap-1">
+                        <MapPin className="w-4 h-4" />
+                        {expert.location}
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <Clock className="w-4 h-4" />
+                        평균 {expert.responseTime} 응답
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <Award className="w-4 h-4" />
+                        {expert.completedProjects}건 완료
+                      </div>
+                    </div>
                   </div>
                 </div>
+                <Button variant="outline" size="sm">
+                  <Heart className="w-4 h-4" />
+                </Button>
               </div>
 
               {/* About */}
@@ -239,25 +251,40 @@ export default function ExpertDetailPage({ params }: { params: { id: string } })
             {/* Action Card */}
             <Card className="p-6 sticky top-8">
               <h3 className="text-xl font-semibold text-gray-900 mb-4">연락하기</h3>
-              <div className="space-y-4">
-                <Link href={`/contact/${expert.id}`}>
-                  <Button className="w-full h-12 text-lg">
-                    📞 전문가에게 연락하기
+              <div className="space-y-3">
+                <Link href={`/request?expert=${expert.id}`}>
+                  <Button className="w-full h-12 text-base bg-blue-600 hover:bg-blue-700">
+                    <Phone className="w-5 h-5 mr-2" />
+                    견적 요청하기
                   </Button>
                 </Link>
-                <Button variant="outline" className="w-full h-12">
-                  ❤️ 찜하기
+                <Button variant="outline" className="w-full h-12 text-base">
+                  <MessageSquare className="w-5 h-5 mr-2" />
+                  채팅으로 문의
+                </Button>
+                <Button variant="outline" className="w-full h-12 text-base">
+                  <Heart className="w-5 h-5 mr-2" />
+                  관심 전문가 추가
                 </Button>
               </div>
 
-              <div className="mt-6 p-4 bg-yellow-50 rounded-lg">
+              <div className="mt-6 p-4 bg-green-50 rounded-lg border border-green-200">
                 <div className="flex items-center gap-2 mb-2">
-                  <span className="text-lg">⚡</span>
-                  <span className="font-semibold text-yellow-800">빠른 응답</span>
+                  <Clock className="w-5 h-5 text-green-600" />
+                  <span className="font-semibold text-green-800">빠른 응답</span>
                 </div>
-                <p className="text-sm text-yellow-700">
+                <p className="text-sm text-green-700">
                   평균 {expert.responseTime} 내 응답합니다
                 </p>
+              </div>
+
+              <div className="mt-4 p-4 bg-blue-50 rounded-lg border border-blue-200">
+                <div className="text-center">
+                  <p className="text-sm text-blue-800 font-medium">시간당 예상 비용</p>
+                  <p className="text-2xl font-bold text-blue-900 mt-1">
+                    {expert.pricePerHour?.toLocaleString()}원
+                  </p>
+                </div>
               </div>
             </Card>
 
