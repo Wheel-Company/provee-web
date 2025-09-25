@@ -157,7 +157,7 @@ const GuestActions: React.FC = () => {
   )
 }
 
-const Navigation: React.FC<{ userRole?: 'customer' | 'provider' }> = ({ userRole }) => {
+const Navigation: React.FC<{ userRole?: 'customer' | 'expert' }> = ({ userRole }) => {
   return (
     <nav className="hidden lg:flex items-center space-x-8">
       <Button variant="ghost" className="text-gray-700 hover:text-blue-600">
