@@ -240,7 +240,6 @@ const LayoutWrapper: React.FC<LayoutWrapperProps> = ({
               <SimpleHeader />
             ) : (
               <Header
-                user={user}
                 onMenuToggle={handleMobileSidebarToggle}
                 variant={finalLayout.headerVariant}
               />
