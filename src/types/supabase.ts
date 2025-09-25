@@ -6,353 +6,201 @@ export type Json =
   | { [key: string]: Json | undefined }
   | Json[]
 
-export interface Database {
+export type Database = {
+  // Allows to automatically instantiate createClient with right options
+  // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
+  __InternalSupabase: {
+    PostgrestVersion: "13.0.5"
+  }
   public: {
     Tables: {
-      profiles: {
+      experts: {
         Row: {
-          id: string
-          role: 'customer' | 'provider'
-          name: string
-          avatar_url: string | null
-          phone: string | null
-          location_city: string | null
-          location_district: string | null
-          bio: string | null
-          website: string | null
-          specializations: string[] | null
-          hourly_rate: number | null
-          experience_years: number | null
-          portfolio_urls: string[] | null
-          verification_phone: boolean
-          verification_identity: boolean
-          verification_business: boolean
-          deposit_paid: boolean
-          deposit_amount: number
-          rating: number
-          review_count: number
-          success_count: number
-          total_matches: number
-          avg_response_time: number
           created_at: string
-          updated_at: string
-        }
-        Insert: {
+          description: string | null
           id: string
-          role?: 'customer' | 'provider'
-          name: string
-          avatar_url?: string | null
-          phone?: string | null
-          location_city?: string | null
-          location_district?: string | null
-          bio?: string | null
-          website?: string | null
-          specializations?: string[] | null
-          hourly_rate?: number | null
-          experience_years?: number | null
-          portfolio_urls?: string[] | null
-          verification_phone?: boolean
-          verification_identity?: boolean
-          verification_business?: boolean
-          deposit_paid?: boolean
-          deposit_amount?: number
-          rating?: number
-          review_count?: number
-          success_count?: number
-          total_matches?: number
-          avg_response_time?: number
-          created_at?: string
-          updated_at?: string
-        }
-        Update: {
-          id?: string
-          role?: 'customer' | 'provider'
-          name?: string
-          avatar_url?: string | null
-          phone?: string | null
-          location_city?: string | null
-          location_district?: string | null
-          bio?: string | null
-          website?: string | null
-          specializations?: string[] | null
-          hourly_rate?: number | null
-          experience_years?: number | null
-          portfolio_urls?: string[] | null
-          verification_phone?: boolean
-          verification_identity?: boolean
-          verification_business?: boolean
-          deposit_paid?: boolean
-          deposit_amount?: number
-          rating?: number
-          review_count?: number
-          success_count?: number
-          total_matches?: number
-          avg_response_time?: number
-          created_at?: string
-          updated_at?: string
-        }
-      }
-      services: {
-        Row: {
-          id: string
-          provider_id: string
-          title: string
-          description: string
-          category: 'development' | 'design' | 'marketing' | 'writing' | 'photo' | 'consulting' | 'other'
-          price_min: number
-          price_max: number
-          duration_days: number | null
-          requirements: string[] | null
-          deliverables: string[] | null
+          location: string
           portfolio_images: string[] | null
-          location_required: boolean
-          target_cities: string[] | null
-          active: boolean
-          featured: boolean
-          created_at: string
-          updated_at: string
-        }
-        Insert: {
-          id?: string
-          provider_id: string
-          title: string
-          description: string
-          category: 'development' | 'design' | 'marketing' | 'writing' | 'photo' | 'consulting' | 'other'
-          price_min: number
           price_max: number
-          duration_days?: number | null
-          requirements?: string[] | null
-          deliverables?: string[] | null
-          portfolio_images?: string[] | null
-          location_required?: boolean
-          target_cities?: string[] | null
-          active?: boolean
-          featured?: boolean
-          created_at?: string
-          updated_at?: string
-        }
-        Update: {
-          id?: string
-          provider_id?: string
-          title?: string
-          description?: string
-          category?: 'development' | 'design' | 'marketing' | 'writing' | 'photo' | 'consulting' | 'other'
-          price_min?: number
-          price_max?: number
-          duration_days?: number | null
-          requirements?: string[] | null
-          deliverables?: string[] | null
-          portfolio_images?: string[] | null
-          location_required?: boolean
-          target_cities?: string[] | null
-          active?: boolean
-          featured?: boolean
-          created_at?: string
-          updated_at?: string
-        }
-      }
-      service_requests: {
-        Row: {
-          id: string
-          customer_id: string
-          service_id: string | null
-          title: string
-          description: string
-          category: 'development' | 'design' | 'marketing' | 'writing' | 'photo' | 'consulting' | 'other'
-          budget_min: number
-          budget_max: number
-          deadline: string | null
-          location_city: string | null
-          location_district: string | null
-          remote_work_allowed: boolean
-          requirements: string[] | null
-          additional_info: Json | null
-          status: 'pending' | 'matched' | 'accepted' | 'rejected' | 'completed' | 'cancelled'
-          created_at: string
+          price_min: number
+          rating: number | null
+          review_count: number | null
+          services: string[]
           updated_at: string
+          verified: boolean | null
         }
         Insert: {
-          id?: string
-          customer_id: string
-          service_id?: string | null
-          title: string
-          description: string
-          category: 'development' | 'design' | 'marketing' | 'writing' | 'photo' | 'consulting' | 'other'
-          budget_min: number
-          budget_max: number
-          deadline?: string | null
-          location_city?: string | null
-          location_district?: string | null
-          remote_work_allowed?: boolean
-          requirements?: string[] | null
-          additional_info?: Json | null
-          status?: 'pending' | 'matched' | 'accepted' | 'rejected' | 'completed' | 'cancelled'
           created_at?: string
+          description?: string | null
+          id: string
+          location: string
+          portfolio_images?: string[] | null
+          price_max?: number
+          price_min?: number
+          rating?: number | null
+          review_count?: number | null
+          services?: string[]
           updated_at?: string
+          verified?: boolean | null
         }
         Update: {
-          id?: string
-          customer_id?: string
-          service_id?: string | null
-          title?: string
-          description?: string
-          category?: 'development' | 'design' | 'marketing' | 'writing' | 'photo' | 'consulting' | 'other'
-          budget_min?: number
-          budget_max?: number
-          deadline?: string | null
-          location_city?: string | null
-          location_district?: string | null
-          remote_work_allowed?: boolean
-          requirements?: string[] | null
-          additional_info?: Json | null
-          status?: 'pending' | 'matched' | 'accepted' | 'rejected' | 'completed' | 'cancelled'
           created_at?: string
+          description?: string | null
+          id?: string
+          location?: string
+          portfolio_images?: string[] | null
+          price_max?: number
+          price_min?: number
+          rating?: number | null
+          review_count?: number | null
+          services?: string[]
           updated_at?: string
+          verified?: boolean | null
         }
+        Relationships: [
+          {
+            foreignKeyName: "experts_id_fkey"
+            columns: ["id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       matches: {
         Row: {
-          id: string
-          request_id: string
-          provider_id: string
-          service_id: string | null
-          compatibility_score: number
-          service_compatibility: number
-          price_compatibility: number
-          location_compatibility: number
-          reputation_score: number
-          match_reasoning: Json | null
-          estimated_price: number | null
-          estimated_duration: number | null
-          status: 'pending' | 'matched' | 'accepted' | 'rejected' | 'completed' | 'cancelled'
-          customer_viewed_at: string | null
-          provider_viewed_at: string | null
           created_at: string
+          customer_id: string
+          expert_id: string
+          id: string
+          match_score: number
+          request_id: string
+          status: Database["public"]["Enums"]["match_status"] | null
           updated_at: string
         }
         Insert: {
-          id?: string
-          request_id: string
-          provider_id: string
-          service_id?: string | null
-          compatibility_score: number
-          service_compatibility: number
-          price_compatibility: number
-          location_compatibility: number
-          reputation_score: number
-          match_reasoning?: Json | null
-          estimated_price?: number | null
-          estimated_duration?: number | null
-          status?: 'pending' | 'matched' | 'accepted' | 'rejected' | 'completed' | 'cancelled'
-          customer_viewed_at?: string | null
-          provider_viewed_at?: string | null
           created_at?: string
+          customer_id: string
+          expert_id: string
+          id?: string
+          match_score: number
+          request_id: string
+          status?: Database["public"]["Enums"]["match_status"] | null
           updated_at?: string
         }
         Update: {
+          created_at?: string
+          customer_id?: string
+          expert_id?: string
           id?: string
+          match_score?: number
           request_id?: string
-          provider_id?: string
-          service_id?: string | null
-          compatibility_score?: number
-          service_compatibility?: number
-          price_compatibility?: number
-          location_compatibility?: number
-          reputation_score?: number
-          match_reasoning?: Json | null
-          estimated_price?: number | null
-          estimated_duration?: number | null
-          status?: 'pending' | 'matched' | 'accepted' | 'rejected' | 'completed' | 'cancelled'
-          customer_viewed_at?: string | null
-          provider_viewed_at?: string | null
-          created_at?: string
+          status?: Database["public"]["Enums"]["match_status"] | null
           updated_at?: string
         }
+        Relationships: [
+          {
+            foreignKeyName: "matches_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "matches_expert_id_fkey"
+            columns: ["expert_id"]
+            isOneToOne: false
+            referencedRelation: "experts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "matches_request_id_fkey"
+            columns: ["request_id"]
+            isOneToOne: false
+            referencedRelation: "service_requests"
+            referencedColumns: ["id"]
+          },
+        ]
       }
-      reviews: {
+      profiles: {
         Row: {
-          id: string
-          match_id: string
-          reviewer_id: string
-          reviewee_id: string
-          rating: number
-          title: string | null
-          content: string | null
-          communication_rating: number | null
-          quality_rating: number | null
-          timeliness_rating: number | null
-          professionalism_rating: number | null
-          would_recommend: boolean
           created_at: string
+          email: string
+          id: string
+          name: string
+          phone: string | null
+          updated_at: string
+          user_type: Database["public"]["Enums"]["user_type"]
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          id?: string
+          name: string
+          phone?: string | null
+          updated_at?: string
+          user_type: Database["public"]["Enums"]["user_type"]
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          id?: string
+          name?: string
+          phone?: string | null
+          updated_at?: string
+          user_type?: Database["public"]["Enums"]["user_type"]
+        }
+        Relationships: []
+      }
+      service_requests: {
+        Row: {
+          budget_max: number
+          budget_min: number
+          category: string
+          created_at: string
+          customer_id: string
+          description: string
+          id: string
+          location: string
+          status: Database["public"]["Enums"]["request_status"] | null
+          title: string
           updated_at: string
         }
         Insert: {
-          id?: string
-          match_id: string
-          reviewer_id: string
-          reviewee_id: string
-          rating: number
-          title?: string | null
-          content?: string | null
-          communication_rating?: number | null
-          quality_rating?: number | null
-          timeliness_rating?: number | null
-          professionalism_rating?: number | null
-          would_recommend?: boolean
+          budget_max: number
+          budget_min: number
+          category: string
           created_at?: string
+          customer_id: string
+          description: string
+          id?: string
+          location: string
+          status?: Database["public"]["Enums"]["request_status"] | null
+          title: string
           updated_at?: string
         }
         Update: {
-          id?: string
-          match_id?: string
-          reviewer_id?: string
-          reviewee_id?: string
-          rating?: number
-          title?: string | null
-          content?: string | null
-          communication_rating?: number | null
-          quality_rating?: number | null
-          timeliness_rating?: number | null
-          professionalism_rating?: number | null
-          would_recommend?: boolean
+          budget_max?: number
+          budget_min?: number
+          category?: string
           created_at?: string
-          updated_at?: string
-        }
-      }
-      notifications: {
-        Row: {
-          id: string
-          user_id: string
-          type: string
-          title: string
-          message: string
-          data: Json | null
-          read: boolean
-          read_at: string | null
-          created_at: string
-        }
-        Insert: {
+          customer_id?: string
+          description?: string
           id?: string
-          user_id: string
-          type: string
-          title: string
-          message: string
-          data?: Json | null
-          read?: boolean
-          read_at?: string | null
-          created_at?: string
-        }
-        Update: {
-          id?: string
-          user_id?: string
-          type?: string
+          location?: string
+          status?: Database["public"]["Enums"]["request_status"] | null
           title?: string
-          message?: string
-          data?: Json | null
-          read?: boolean
-          read_at?: string | null
-          created_at?: string
+          updated_at?: string
         }
+        Relationships: [
+          {
+            foreignKeyName: "service_requests_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {
@@ -362,9 +210,139 @@ export interface Database {
       [_ in never]: never
     }
     Enums: {
-      user_role: 'customer' | 'provider'
-      service_category: 'development' | 'design' | 'marketing' | 'writing' | 'photo' | 'consulting' | 'other'
-      match_status: 'pending' | 'matched' | 'accepted' | 'rejected' | 'completed' | 'cancelled'
+      match_status: "pending" | "accepted" | "declined" | "completed"
+      request_status: "pending" | "matched" | "completed" | "cancelled"
+      user_type: "customer" | "expert"
+    }
+    CompositeTypes: {
+      [_ in never]: never
     }
   }
 }
+
+type DatabaseWithoutInternals = Omit<Database, "__InternalSupabase">
+
+type DefaultSchema = DatabaseWithoutInternals[Extract<keyof Database, "public">]
+
+export type Tables<
+  DefaultSchemaTableNameOrOptions extends
+    | keyof (DefaultSchema["Tables"] & DefaultSchema["Views"])
+    | { schema: keyof DatabaseWithoutInternals },
+  TableName extends DefaultSchemaTableNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals
+  }
+    ? keyof (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
+        DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])
+    : never = never,
+> = DefaultSchemaTableNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
+      DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])[TableName] extends {
+      Row: infer R
+    }
+    ? R
+    : never
+  : DefaultSchemaTableNameOrOptions extends keyof (DefaultSchema["Tables"] &
+        DefaultSchema["Views"])
+    ? (DefaultSchema["Tables"] &
+        DefaultSchema["Views"])[DefaultSchemaTableNameOrOptions] extends {
+        Row: infer R
+      }
+      ? R
+      : never
+    : never
+
+export type TablesInsert<
+  DefaultSchemaTableNameOrOptions extends
+    | keyof DefaultSchema["Tables"]
+    | { schema: keyof DatabaseWithoutInternals },
+  TableName extends DefaultSchemaTableNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals
+  }
+    ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
+    : never = never,
+> = DefaultSchemaTableNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
+      Insert: infer I
+    }
+    ? I
+    : never
+  : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema["Tables"]
+    ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
+        Insert: infer I
+      }
+      ? I
+      : never
+    : never
+
+export type TablesUpdate<
+  DefaultSchemaTableNameOrOptions extends
+    | keyof DefaultSchema["Tables"]
+    | { schema: keyof DatabaseWithoutInternals },
+  TableName extends DefaultSchemaTableNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals
+  }
+    ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
+    : never = never,
+> = DefaultSchemaTableNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
+      Update: infer U
+    }
+    ? U
+    : never
+  : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema["Tables"]
+    ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
+        Update: infer U
+      }
+      ? U
+      : never
+    : never
+
+export type Enums<
+  DefaultSchemaEnumNameOrOptions extends
+    | keyof DefaultSchema["Enums"]
+    | { schema: keyof DatabaseWithoutInternals },
+  EnumName extends DefaultSchemaEnumNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals
+  }
+    ? keyof DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"]
+    : never = never,
+> = DefaultSchemaEnumNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"][EnumName]
+  : DefaultSchemaEnumNameOrOptions extends keyof DefaultSchema["Enums"]
+    ? DefaultSchema["Enums"][DefaultSchemaEnumNameOrOptions]
+    : never
+
+export type CompositeTypes<
+  PublicCompositeTypeNameOrOptions extends
+    | keyof DefaultSchema["CompositeTypes"]
+    | { schema: keyof DatabaseWithoutInternals },
+  CompositeTypeName extends PublicCompositeTypeNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals
+  }
+    ? keyof DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
+    : never = never,
+> = PublicCompositeTypeNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"][CompositeTypeName]
+  : PublicCompositeTypeNameOrOptions extends keyof DefaultSchema["CompositeTypes"]
+    ? DefaultSchema["CompositeTypes"][PublicCompositeTypeNameOrOptions]
+    : never
+
+export const Constants = {
+  public: {
+    Enums: {
+      match_status: ["pending", "accepted", "declined", "completed"],
+      request_status: ["pending", "matched", "completed", "cancelled"],
+      user_type: ["customer", "expert"],
+    },
+  },
+} as const

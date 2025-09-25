@@ -16,14 +16,12 @@ export type TablesInsert<T extends keyof Database['public']['Tables']> = Databas
 export type TablesUpdate<T extends keyof Database['public']['Tables']> = Database['public']['Tables'][T]['Update']
 export type Enums<T extends keyof Database['public']['Enums']> = Database['public']['Enums'][T]
 
-// 자주 사용할 타입들
+// 자주 사용할 타입들 (현재 스키마 기준)
 export type Profile = Tables<'profiles'>
-export type Service = Tables<'services'>
+export type Expert = Tables<'experts'>
 export type ServiceRequest = Tables<'service_requests'>
 export type Match = Tables<'matches'>
-export type Review = Tables<'reviews'>
-export type Notification = Tables<'notifications'>
 
-export type UserRole = Enums<'user_role'>
-export type ServiceCategory = Enums<'service_category'>
+export type UserType = Enums<'user_type'>
 export type MatchStatus = Enums<'match_status'>
+export type RequestStatus = Enums<'request_status'>
