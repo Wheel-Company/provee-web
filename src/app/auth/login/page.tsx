@@ -9,7 +9,8 @@ import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { SimpleHeader } from '@/components/layout/header'
 import { Eye, EyeOff, User, Lock } from 'lucide-react'
-import { supabase } from '@/lib/supabase'
+import { createClient } from '@supabase/supabase-js'
+import { Database } from '@/types/supabase'
 
 export default function LoginPage() {
   const [username, setUsername] = useState('')
@@ -19,6 +20,12 @@ export default function LoginPage() {
   const [errorMessage, setErrorMessage] = useState('')
 
   const router = useRouter()
+
+  // 임시 해결책: 로컬에서 새로운 Supabase 클라이언트 생성
+  const supabase = createClient<Database>(
+    'https://jqqwiokellbkyzhqrqls.supabase.co',
+    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpxcXdpb2tlbGxia3l6aHFycWxzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTg3MDI3ODksImV4cCI6MjA3NDI3ODc4OX0.DjVi6aL2dCvwkUNViLx08M8tUwWWIZ_eO0CAGOeE-m4'
+  )
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
