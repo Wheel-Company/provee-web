@@ -4,11 +4,11 @@ import { Database } from '@/types/supabase'
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 
-// 기본 클라이언트
-export const supabase = createClient(supabaseUrl, supabaseAnonKey)
+// 단일 Supabase 클라이언트 (타입 적용)
+export const supabase = createClient<Database>(supabaseUrl, supabaseAnonKey)
 
-// 타입이 적용된 Supabase 클라이언트
-export const typedSupabase = createClient<Database>(supabaseUrl, supabaseAnonKey)
+// 레거시 호환성을 위한 별칭
+export const typedSupabase = supabase
 
 // 편의를 위한 타입 내보내기
 export type Tables<T extends keyof Database['public']['Tables']> = Database['public']['Tables'][T]['Row']
