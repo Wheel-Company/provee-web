@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { User } from '@supabase/supabase-js'
+import { useRouter } from 'next/navigation'
 import { supabaseClient } from '@/lib/supabase-client'
 
 interface UserProfile {
@@ -17,6 +18,7 @@ export function useUser() {
   const [user, setUser] = useState<User | null>(null)
   const [profile, setProfile] = useState<UserProfile | null>(null)
   const [loading, setLoading] = useState(true)
+  const router = useRouter()
 
   useEffect(() => {
     // 현재 사용자 세션 가져오기
@@ -69,6 +71,9 @@ export function useUser() {
     const { error } = await supabaseClient.auth.signOut()
     if (error) {
       console.error('Error signing out:', error)
+    } else {
+      // 로그아웃 성공시 홈페이지로 이동
+      router.push('/')
     }
   }
 

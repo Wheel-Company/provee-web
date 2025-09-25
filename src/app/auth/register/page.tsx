@@ -9,7 +9,7 @@ import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { SimpleHeader } from '@/components/layout/header'
 import { Eye, EyeOff, User, Lock, Mail, Phone } from 'lucide-react'
-import { supabase } from '@/lib/supabase'
+import { supabaseClient } from '@/lib/supabase-client'
 
 export default function RegisterPage() {
   const [formData, setFormData] = useState({
@@ -60,7 +60,7 @@ export default function RegisterPage() {
       // 전화번호는 프로필 생성 시 에러로 체크
 
       // 2. Supabase Auth로 사용자 생성 (이메일 중복은 여기서 자동 체크됨)
-      const { data: authData, error: authError } = await supabase.auth.signUp({
+      const { data: authData, error: authError } = await supabaseClient.auth.signUp({
         email: formData.email,
         password: formData.password,
       })
@@ -80,7 +80,7 @@ export default function RegisterPage() {
 
       // 2. profiles 테이블에 추가 정보 저장
       if (authData.user) {
-        const { error: profileError } = await supabase
+        const { error: profileError } = await supabaseClient
           .from('profiles')
           .insert([
             {
