@@ -145,6 +145,11 @@ const UserMenu: React.FC = () => {
 const GuestActions: React.FC = () => {
   return (
     <div className="flex items-center space-x-3">
+      <Link href="/expert/join">
+        <Button variant="outline" size="sm" className="text-blue-600 border-blue-600 hover:bg-blue-50">
+          전문가 등록
+        </Button>
+      </Link>
       <Link href="/auth/login">
         <Button variant="ghost" size="sm">
           로그인
