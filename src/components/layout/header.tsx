@@ -3,9 +3,9 @@
 import React, { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Avatar } from '@/components/ui/avatar'
+import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
-import { TrustIndicator } from '@/components/features/trust-indicator'
+import { TrustIndicator } from '@/components/provee/trust-indicator'
 import {
   Search,
   Bell,
@@ -105,11 +105,9 @@ const UserMenu: React.FC<{ user: UserType }> = ({ user }) => {
       {/* 신뢰도 표시 */}
       <div className="hidden md:block">
         <TrustIndicator
-          depositStatus="paid"
-          verificationLevel={user.role === 'provider' ? 'business' : 'identity'}
-          platformRating={4.8}
-          successRate={0.85}
-          variant="compact"
+          type="verified"
+          score={95}
+          label="신뢰도"
         />
       </div>
 
@@ -122,12 +120,10 @@ const UserMenu: React.FC<{ user: UserType }> = ({ user }) => {
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button variant="ghost" className="flex items-center space-x-2 p-1">
-            <Avatar
-              src={user.avatar}
-              alt={user.name}
-              size="sm"
-              fallback={user.name.charAt(0)}
-            />
+            <Avatar className="h-8 w-8">
+              <AvatarImage src={user.avatar} alt={user.name} />
+              <AvatarFallback>{user.name.charAt(0)}</AvatarFallback>
+            </Avatar>
             <span className="hidden md:block text-sm font-medium">
               {user.name}
             </span>
