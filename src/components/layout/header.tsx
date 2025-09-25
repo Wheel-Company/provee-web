@@ -173,7 +173,7 @@ const Navigation: React.FC<{ userRole?: 'customer' | 'expert' }> = ({ userRole }
           </Button>
         </>
       )}
-      {userRole === 'provider' && (
+      {userRole === 'expert' && (
         <>
           <Button variant="ghost" className="text-gray-700 hover:text-blue-600">
             요청서 관리
