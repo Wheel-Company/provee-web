@@ -9,8 +9,7 @@ import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { SimpleHeader } from '@/components/layout/header'
 import { Eye, EyeOff, User, Lock } from 'lucide-react'
-import { createClient } from '@supabase/supabase-js'
-import { Database } from '@/types/supabase'
+import { supabaseClient } from '@/lib/supabase-client'
 
 export default function LoginPage() {
   const [username, setUsername] = useState('')
@@ -21,11 +20,6 @@ export default function LoginPage() {
 
   const router = useRouter()
 
-  // 임시 해결책: 로컬에서 새로운 Supabase 클라이언트 생성
-  const supabase = createClient<Database>(
-    'https://jqqwiokellbkyzhqrqls.supabase.co',
-    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpxcXdpb2tlbGxia3l6aHFycWxzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTg3MDI3ODksImV4cCI6MjA3NDI3ODc4OX0.DjVi6aL2dCvwkUNViLx08M8tUwWWIZ_eO0CAGOeE-m4'
-  )
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -35,7 +29,7 @@ export default function LoginPage() {
 
     try {
       // 1. username으로 profiles 테이블에서 사용자 조회
-      const { data: profile, error: profileError } = await supabase
+      const { data: profile, error: profileError } = await supabaseClient
         .from('profiles')
         .select('*')
         .eq('username', username)
@@ -48,7 +42,7 @@ export default function LoginPage() {
       }
 
       // 2. Supabase Auth로 로그인 (이메일과 비밀번호 사용)
-      const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
+      const { data: authData, error: authError } = await supabaseClient.auth.signInWithPassword({
         email: profile.email,
         password: password,
       })
