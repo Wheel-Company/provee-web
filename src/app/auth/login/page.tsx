@@ -24,6 +24,10 @@ export default function LoginPage() {
     e.preventDefault()
 
     console.log('로그인 시도:', { username })
+    console.log('환경변수 확인:', {
+      url: process.env.NEXT_PUBLIC_SUPABASE_URL,
+      key: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY?.substring(0, 20) + '...'
+    })
     setIsLoading(true)
     setErrorMessage('')
 
