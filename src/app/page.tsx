@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -29,6 +30,7 @@ import {
 } from 'lucide-react'
 
 export default function HomePage() {
+  const router = useRouter()
   const [searchQuery, setSearchQuery] = useState('')
 
   // 메인 카테고리
@@ -99,8 +101,7 @@ export default function HomePage() {
 
   const handleSearch = () => {
     if (searchQuery.trim()) {
-      // TODO: 검색 페이지로 이동
-      console.log('Searching for:', searchQuery)
+      router.push('/request')
     }
   }
 
@@ -168,7 +169,11 @@ export default function HomePage() {
             {mainCategories.map((category, index) => {
               const Icon = category.icon
               return (
-                <Card key={index} className="p-6 hover:shadow-lg transition-shadow cursor-pointer group">
+                <Card
+                  key={index}
+                  className="p-6 hover:shadow-lg transition-shadow cursor-pointer group"
+                  onClick={() => router.push('/request')}
+                >
                   <div className="text-center">
                     <div className={`w-12 h-12 rounded-lg ${category.color} flex items-center justify-center mx-auto mb-3 group-hover:scale-110 transition-transform`}>
                       <Icon className="w-6 h-6" />
@@ -349,7 +354,11 @@ export default function HomePage() {
           </p>
 
           <div className="flex justify-center space-x-4">
-            <Button size="lg" className="bg-white text-blue-600 hover:bg-gray-100 px-8">
+            <Button
+              size="lg"
+              className="bg-white text-blue-600 hover:bg-gray-100 px-8"
+              onClick={() => router.push('/request')}
+            >
               서비스 찾기
             </Button>
             <Link href="/expert/join">
