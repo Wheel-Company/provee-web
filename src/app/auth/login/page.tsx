@@ -30,6 +30,13 @@ export default function LoginPage() {
     try {
       // 1. username으로 profiles 테이블에서 사용자 조회
       console.log('프로필 조회 중...')
+
+      // 임시: 모든 사용자 목록 확인
+      const { data: allProfiles, error: allProfilesError } = await supabase
+        .from('profiles')
+        .select('username, email, user_type')
+      console.log('전체 프로필 목록:', allProfiles, '에러:', allProfilesError)
+
       const { data: profile, error: profileError } = await supabase
         .from('profiles')
         .select('*')
@@ -37,6 +44,9 @@ export default function LoginPage() {
         .single()
 
       console.log('프로필 조회 결과:', { profile, profileError })
+      if (profileError) {
+        console.error('프로필 에러 상세:', profileError.message, profileError.code, profileError.hint)
+      }
 
       if (profileError || !profile) {
         console.log('프로필 조회 실패')
