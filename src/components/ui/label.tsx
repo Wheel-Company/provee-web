@@ -3,6 +3,7 @@ import * as LabelPrimitive from "@radix-ui/react-label"
 import { cva, type VariantProps } from "class-variance-authority"
 
 import { cn } from "@/lib/utils"
+import { AlertCircle } from "lucide-react"
 
 const labelVariants = cva(
   "korean-text text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
@@ -116,20 +117,7 @@ const FormLabel = React.forwardRef<
 
     {error && (
       <p className="korean-text text-xs text-red-600 dark:text-red-400 flex items-center gap-1">
-        <svg
-          className="h-3 w-3"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-          xmlns="http://www.w3.org/2000/svg"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-          />
-        </svg>
+        <AlertCircle className="h-3 w-3" />
         {error}
       </p>
     )}
