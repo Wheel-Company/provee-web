@@ -22,38 +22,50 @@ export default function LoginPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+
+    console.log('로그인 시도:', { username })
     setIsLoading(true)
     setErrorMessage('')
 
     try {
       // 1. username으로 profiles 테이블에서 사용자 조회
+      console.log('프로필 조회 중...')
       const { data: profile, error: profileError } = await supabase
         .from('profiles')
         .select('*')
         .eq('username', username)
         .single()
 
+      console.log('프로필 조회 결과:', { profile, profileError })
+
       if (profileError || !profile) {
+        console.log('프로필 조회 실패')
         setErrorMessage('아이디 또는 비밀번호가 올바르지 않습니다.')
         setIsLoading(false)
         return
       }
 
       // 2. Supabase Auth로 로그인 (이메일과 비밀번호 사용)
+      console.log('인증 시도 중...', profile.email)
       const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
         email: profile.email,
         password: password,
       })
 
+      console.log('인증 결과:', { authData, authError })
+
       if (authError) {
+        console.log('인증 실패:', authError)
         setErrorMessage('아이디 또는 비밀번호가 올바르지 않습니다.')
         setIsLoading(false)
         return
       }
 
       // 로그인 성공시 대시보드로 리다이렉트
+      console.log('로그인 성공, 리다이렉트 중...')
       router.push('/dashboard')
     } catch (err) {
+      console.error('로그인 오류:', err)
       setErrorMessage('로그인 중 오류가 발생했습니다.')
       setIsLoading(false)
     }
