@@ -89,7 +89,7 @@ export default function RegisterPage() {
               email: formData.email,
               name: formData.name,
               phone: formData.phone,
-              user_type: formData.userType,
+              user_type: formData.userType as 'customer' | 'expert',
               created_at: new Date().toISOString(),
               updated_at: new Date().toISOString()
             }
