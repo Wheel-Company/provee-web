@@ -210,8 +210,6 @@ export default function ExpertDashboard() {
               </div>
             ))}
           </div>
-        </Card>
-
             </Card>
           </div>
 

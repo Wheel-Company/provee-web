@@ -39,9 +39,7 @@ export default function ProfileSettingsPage() {
     name: profile?.name || '',
     username: profile?.username || '',
     email: user?.email || '',
-    phone: profile?.phone || '',
-    location: profile?.location || '',
-    bio: profile?.bio || ''
+    phone: profile?.phone || ''
   })
 
   const settingSections: SettingSection[] = [
@@ -172,32 +170,6 @@ export default function ProfileSettingsPage() {
                 className="pl-10"
               />
             </div>
-          </div>
-          <div className="md:col-span-2">
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              지역
-            </label>
-            <div className="relative">
-              <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-              <Input
-                value={profileData.location}
-                onChange={(e) => handleInputChange('location', e.target.value)}
-                placeholder="지역을 입력하세요"
-                className="pl-10"
-              />
-            </div>
-          </div>
-          <div className="md:col-span-2">
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              자기소개
-            </label>
-            <textarea
-              value={profileData.bio}
-              onChange={(e) => handleInputChange('bio', e.target.value)}
-              placeholder="자기소개를 입력하세요"
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none"
-              rows={4}
-            />
           </div>
         </div>
       </Card>

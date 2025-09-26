@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { Header } from '@/components/layout/header'
 import { Button } from '@/components/ui/button'
@@ -37,7 +37,7 @@ interface QuoteRequest {
   contactPreference: string
 }
 
-export default function RequestQuotePage() {
+function RequestQuotePageContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const [currentStep, setCurrentStep] = useState(1)
@@ -816,5 +816,13 @@ export default function RequestQuotePage() {
         )}
       </div>
     </div>
+  )
+}
+
+export default function RequestQuotePage() {
+  return (
+    <Suspense fallback={<div>견적 요청 페이지 로딩 중...</div>}>
+      <RequestQuotePageContent />
+    </Suspense>
   )
 }
