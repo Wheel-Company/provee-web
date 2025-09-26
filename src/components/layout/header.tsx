@@ -91,15 +91,6 @@ const UserMenu: React.FC = () => {
 
   return (
     <div className="flex items-center space-x-4">
-      {/* 요청 등록 바로가기 (고객용) */}
-      {profile.user_type !== 'expert' && (
-        <Link href="/request">
-          <Button size="sm" className="bg-green-600 hover:bg-green-700">
-            요청 등록
-          </Button>
-        </Link>
-      )}
-
       {/* 알림 */}
       <Button variant="ghost" size="sm" className="relative p-2">
         <Bell className="w-5 h-5" />
@@ -158,11 +149,6 @@ const UserMenu: React.FC = () => {
 const GuestActions: React.FC = () => {
   return (
     <div className="flex items-center space-x-3">
-      <Link href="/request">
-        <Button size="sm" className="bg-green-600 hover:bg-green-700">
-          요청 등록
-        </Button>
-      </Link>
       <Link href="/expert/join">
         <Button variant="outline" size="sm" className="text-blue-600 border-blue-600 hover:bg-blue-50">
           전문가 등록
