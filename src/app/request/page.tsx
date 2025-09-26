@@ -1,7 +1,7 @@
 'use client'
 
-import { useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useState, useEffect } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { Header } from '@/components/layout/header'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
@@ -39,6 +39,7 @@ interface QuoteRequest {
 
 export default function RequestQuotePage() {
   const router = useRouter()
+  const searchParams = useSearchParams()
   const [currentStep, setCurrentStep] = useState(1)
   const [progress, setProgress] = useState(12)
 
@@ -51,6 +52,22 @@ export default function RequestQuotePage() {
     budget: '',
     contactPreference: ''
   })
+
+  // URL 파라미터에서 카테고리 설정
+  useEffect(() => {
+    const category = searchParams.get('category')
+    if (category) {
+      setRequestData(prev => ({
+        ...prev,
+        category: category
+      }))
+      // 카테고리가 선택된 경우 다음 단계로 진행하거나 적절한 단계로 이동
+      if (currentStep === 1) {
+        setCurrentStep(2)
+        setProgress(25)
+      }
+    }
+  }, [searchParams, currentStep])
 
   // 메인 카테고리 (숨고와 동일한 10개)
   const mainCategories = [

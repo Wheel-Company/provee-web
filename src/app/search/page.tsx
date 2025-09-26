@@ -58,11 +58,23 @@ export default function SearchPage() {
   const [sortBy, setSortBy] = useState('추천순')
   const [viewMode, setViewMode] = useState<'list' | 'map'>('list')
 
-  // URL 파라미터에서 초기 검색어 설정
+  // URL 파라미터에서 초기 검색어 및 카테고리 설정
   useEffect(() => {
     const query = searchParams.get('q')
+    const category = searchParams.get('category')
+
     if (query) {
       setSearchQuery(query)
+    }
+    if (category) {
+      // 유효한 카테고리인지 확인
+      const validCategories = [
+        '전체', '이사/청소', '인테리어', '설치/수리', '외주', '이벤트/파티',
+        '취업/직무', '과외', '취미/자기계발', '자동차', '법률/금융'
+      ]
+      if (validCategories.includes(category)) {
+        setSelectedCategory(category)
+      }
     }
   }, [searchParams])
 

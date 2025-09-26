@@ -174,7 +174,7 @@ export default function HomePage() {
                 <Card
                   key={index}
                   className="p-6 hover:shadow-lg transition-shadow cursor-pointer group"
-                  onClick={() => router.push('/request')}
+                  onClick={() => router.push(`/request?category=${encodeURIComponent(category.name)}`)}
                 >
                   <div className="text-center">
                     <div className={`w-12 h-12 rounded-lg ${category.color} flex items-center justify-center mx-auto mb-3 group-hover:scale-110 transition-transform`}>
