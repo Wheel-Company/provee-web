@@ -1044,4 +1044,63 @@ export class EnhancedProveeAPI {
       }
     }
   }
+
+  // Profile Management
+  static async updateProfile(userId: string, updates: {
+    name?: string
+    username?: string
+    phone?: string
+    avatar_url?: string
+  }): Promise<ApiResponse<any>> {
+    try {
+      const { data, error } = await supabaseClient
+        .from('profiles')
+        .update({
+          ...updates,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', userId)
+        .select()
+        .single()
+
+      if (error) throw error
+
+      return {
+        data,
+        error: null,
+        success: true
+      }
+    } catch (error) {
+      return {
+        data: null,
+        error: error instanceof Error ? error.message : 'Failed to update profile',
+        success: false
+      }
+    }
+  }
+
+  // Get user profile
+  static async getUserProfile(userId: string): Promise<ApiResponse<any>> {
+    try {
+      const { data, error } = await supabaseClient
+        .from('profiles')
+        .select('*')
+        .eq('id', userId)
+        .single()
+
+      if (error) throw error
+
+      return {
+        data,
+        error: null,
+        success: true
+      }
+    } catch (error) {
+      return {
+        data: null,
+        error: error instanceof Error ? error.message : 'Failed to get profile',
+        success: false
+      }
+    }
+  }
 }

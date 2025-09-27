@@ -8,11 +8,11 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { SimpleHeader } from '@/components/layout/header'
-import { Eye, EyeOff, User, Lock } from 'lucide-react'
+import { Eye, EyeOff, Mail, Lock } from 'lucide-react'
 import { supabaseClient } from '@/lib/supabase-client'
 
 export default function LoginPage() {
-  const [username, setUsername] = useState('')
+  const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
@@ -28,27 +28,14 @@ export default function LoginPage() {
     setErrorMessage('')
 
     try {
-      // 1. username으로 profiles 테이블에서 사용자 조회
-      const { data: profile, error: profileError } = await supabaseClient
-        .from('profiles')
-        .select('*')
-        .eq('username', username)
-        .single()
-
-      if (profileError || !profile) {
-        setErrorMessage('아이디 또는 비밀번호가 올바르지 않습니다.')
-        setIsLoading(false)
-        return
-      }
-
-      // 2. Supabase Auth로 로그인 (이메일과 비밀번호 사용)
+      // Supabase Auth로 이메일과 비밀번호로 직접 로그인
       const { data: authData, error: authError } = await supabaseClient.auth.signInWithPassword({
-        email: profile.email,
+        email: email,
         password: password,
       })
 
       if (authError) {
-        setErrorMessage('아이디 또는 비밀번호가 올바르지 않습니다.')
+        setErrorMessage('이메일 또는 비밀번호가 올바르지 않습니다.')
         setIsLoading(false)
         return
       }
@@ -72,7 +59,7 @@ export default function LoginPage() {
               Provee 로그인
             </h1>
             <p className="text-gray-600">
-              아이디와 비밀번호를 입력하세요
+              이메일과 비밀번호를 입력하세요
             </p>
           </div>
 
@@ -89,15 +76,15 @@ export default function LoginPage() {
 
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="username">아이디</Label>
+                  <Label htmlFor="email">이메일</Label>
                   <div className="relative">
-                    <User className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                    <Mail className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
                     <Input
-                      id="username"
-                      type="text"
-                      placeholder="아이디를 입력하세요"
-                      value={username}
-                      onChange={(e) => setUsername(e.target.value)}
+                      id="email"
+                      type="email"
+                      placeholder="이메일을 입력하세요"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
                       className="pl-10"
                       required
                     />

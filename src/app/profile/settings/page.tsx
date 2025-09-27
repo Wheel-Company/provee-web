@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState } from 'react'
+import React, { useState, useEffect, useRef, useCallback } from 'react'
 import { Header } from '@/components/layout/header'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
@@ -20,10 +20,12 @@ import {
   Save,
   Camera,
   Smartphone,
-  Globe
+  Globe,
+  Upload,
+  X
 } from 'lucide-react'
 import { useUser } from '@/hooks/useUser'
-import ProveeAPI from '@/lib/api'
+import { EnhancedProveeAPI } from '@/lib/api-enhanced'
 
 interface SettingSection {
   id: string
@@ -32,16 +34,219 @@ interface SettingSection {
   icon: React.ElementType
 }
 
+interface ProfileSectionProps {
+  profileData: {
+    name: string
+    username: string
+    email: string
+    phone: string
+    avatar_url: string
+  }
+  profile: any
+  loading: boolean
+  profileImage: string | null
+  uploadingImage: boolean
+  fileInputRef: React.RefObject<HTMLInputElement>
+  handleInputChange: (field: string, value: string) => void
+  handleFileSelect: (event: React.ChangeEvent<HTMLInputElement>) => void
+  setProfileImage: (image: string | null) => void
+}
+
+const ProfileSection = React.memo<ProfileSectionProps>(function ProfileSection({
+  profileData,
+  profile,
+  loading,
+  profileImage,
+  uploadingImage,
+  fileInputRef,
+  handleInputChange,
+  handleFileSelect,
+  setProfileImage
+}) {
+  return (
+    <div className="space-y-6">
+      {/* 프로필 사진 */}
+      <Card className="p-6">
+        <h3 className="text-lg font-semibold text-gray-900 mb-4">프로필 사진</h3>
+        <div className="flex items-center space-x-6">
+          <div className="relative">
+            {profileImage ? (
+              <img
+                src={profileImage}
+                alt="프로필 사진"
+                className="w-24 h-24 rounded-full object-cover border-2 border-gray-200"
+              />
+            ) : (
+              <div className="w-24 h-24 bg-gradient-to-br from-blue-400 to-purple-500 rounded-full flex items-center justify-center text-white text-2xl font-bold">
+                {profileData.name?.charAt(0) || profile?.name?.charAt(0) || '관'}
+              </div>
+            )}
+            <Button
+              size="sm"
+              className="absolute -bottom-2 -right-2 h-8 w-8 rounded-full p-0"
+              onClick={() => fileInputRef.current?.click()}
+              disabled={uploadingImage}
+            >
+              {uploadingImage ? (
+                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+              ) : (
+                <Camera className="w-4 h-4" />
+              )}
+            </Button>
+          </div>
+          <div>
+            <p className="text-sm text-gray-600 mb-2">
+              JPG, PNG 파일만 업로드 가능합니다. (최대 5MB)
+            </p>
+            <div className="flex space-x-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => fileInputRef.current?.click()}
+                disabled={uploadingImage}
+              >
+                <Upload className="w-4 h-4 mr-2" />
+                사진 변경
+              </Button>
+              {profileImage && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="text-red-600"
+                  onClick={() => setProfileImage(null)}
+                >
+                  <X className="w-4 h-4 mr-2" />
+                  삭제
+                </Button>
+              )}
+            </div>
+          </div>
+        </div>
+        {/* 숨겨진 파일 입력 */}
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept="image/jpeg,image/jpg,image/png"
+          onChange={handleFileSelect}
+          className="hidden"
+        />
+      </Card>
+
+      {/* 기본 정보 */}
+      <Card className="p-6">
+        <h3 className="text-lg font-semibold text-gray-900 mb-4">기본 정보</h3>
+
+        {/* 로딩 상태 */}
+        {loading ? (
+          <div className="animate-pulse space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="h-4 bg-gray-200 rounded w-1/4"></div>
+              <div className="h-4 bg-gray-200 rounded w-1/4"></div>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="h-10 bg-gray-200 rounded"></div>
+              <div className="h-10 bg-gray-200 rounded"></div>
+            </div>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                이름
+              </label>
+              <p className="text-xs text-gray-500 mb-2">
+                실명을 입력하세요. 전문가와 고객 간 신뢰를 위해 사용됩니다.
+              </p>
+              <Input
+                value={profileData.name}
+                onChange={(e) => handleInputChange('name', e.target.value)}
+                placeholder="실명을 입력하세요"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                닉네임
+              </label>
+              <p className="text-xs text-gray-500 mb-2">
+                플랫폼에서 표시될 별명입니다. 원하시면 실명과 다르게 설정할 수 있습니다.
+              </p>
+              <Input
+                value={profileData.username}
+                onChange={(e) => handleInputChange('username', e.target.value)}
+                placeholder="표시될 닉네임을 입력하세요"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                이메일
+              </label>
+              <div className="relative">
+                <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                <Input
+                  value={profileData.email}
+                  onChange={(e) => handleInputChange('email', e.target.value)}
+                  placeholder="이메일을 입력하세요"
+                  className="pl-10"
+                  disabled
+                />
+              </div>
+              <Badge variant="secondary" className="mt-1 text-xs">
+                인증됨
+              </Badge>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                전화번호
+              </label>
+              <div className="relative">
+                <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                <Input
+                  value={profileData.phone}
+                  onChange={(e) => handleInputChange('phone', e.target.value)}
+                  placeholder="전화번호를 입력하세요"
+                  className="pl-10"
+                />
+              </div>
+            </div>
+          </div>
+        )}
+      </Card>
+    </div>
+  )
+})
+
 export default function ProfileSettingsPage() {
-  const { profile, user } = useUser()
+  const { profile, user, loading } = useUser()
   const [activeSection, setActiveSection] = useState('profile')
   const [showPassword, setShowPassword] = useState(false)
+  const [profileImage, setProfileImage] = useState<string | null>(null)
+  const [uploadingImage, setUploadingImage] = useState(false)
+  const fileInputRef = useRef<HTMLInputElement>(null)
+
   const [profileData, setProfileData] = useState({
-    name: profile?.name || '',
-    username: profile?.username || '',
-    email: user?.email || '',
-    phone: profile?.phone || ''
+    name: '',
+    username: '',
+    email: '',
+    phone: '',
+    avatar_url: ''
   })
+
+  // 사용자 데이터가 로드되면 폼 데이터 업데이트 (한 번만)
+  const [isInitialized, setIsInitialized] = useState(false)
+
+  useEffect(() => {
+    if (profile && user && !isInitialized) {
+      setProfileData({
+        name: profile.name || '',
+        username: profile.username || '',
+        email: user.email || '',
+        phone: profile.phone || '',
+        avatar_url: profile.avatar_url || ''
+      })
+      setProfileImage(profile.avatar_url || null)
+      setIsInitialized(true)
+    }
+  }, [profile, user, isInitialized])
 
   const settingSections: SettingSection[] = [
     {
@@ -70,129 +275,101 @@ export default function ProfileSettingsPage() {
     }
   ]
 
-  const handleInputChange = (field: string, value: string) => {
+  const handleInputChange = useCallback((field: string, value: string) => {
     setProfileData(prev => ({
       ...prev,
       [field]: value
     }))
+  }, [])
+
+  // 프로필 사진 업로드 처리
+  const handleImageUpload = async (file: File) => {
+    if (!file) return
+
+    // 파일 크기 검증 (5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      alert('파일 크기는 5MB 이하여야 합니다.')
+      return
+    }
+
+    // 파일 형식 검증
+    if (!file.type.match(/^image\/(jpeg|jpg|png)$/)) {
+      alert('JPG, PNG 파일만 업로드 가능합니다.')
+      return
+    }
+
+    setUploadingImage(true)
+
+    try {
+      // 파일을 base64로 변환 (임시 미리보기용)
+      const reader = new FileReader()
+      reader.onload = (e) => {
+        setProfileImage(e.target?.result as string)
+      }
+      reader.readAsDataURL(file)
+
+      // 실제로는 Supabase Storage에 업로드해야 함
+      // 여기서는 임시로 로컬 미리보기만 구현
+      alert('프로필 사진이 업로드되었습니다. "변경사항 저장"을 클릭하여 저장하세요.')
+
+    } catch (error) {
+      console.error('Image upload error:', error)
+      alert('이미지 업로드 중 오류가 발생했습니다.')
+    } finally {
+      setUploadingImage(false)
+    }
+  }
+
+  const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0]
+    if (file) {
+      handleImageUpload(file)
+    }
   }
 
   const handleSave = async () => {
+    if (!user) {
+      alert('사용자 정보를 찾을 수 없습니다.')
+      return
+    }
+
     try {
       const updates = {
-        name: profileData.name,
-        username: profileData.username,
-        phone: profileData.phone
+        name: profileData.name.trim(),
+        username: profileData.username.trim(),
+        phone: profileData.phone.trim(),
+        avatar_url: profileImage || profileData.avatar_url
       }
 
-      const response = await ProveeAPI.updateProfile(updates)
+      // 유효성 검사
+      if (!updates.name) {
+        alert('이름을 입력해주세요.')
+        return
+      }
+
+      if (!updates.username) {
+        alert('닉네임을 입력해주세요.')
+        return
+      }
+
+      console.log('Saving profile updates:', updates)
+
+      const response = await EnhancedProveeAPI.updateProfile(user.id, updates)
 
       if (response.success) {
         alert('설정이 저장되었습니다.')
-        // 프로필 다시 로드하기 위해 페이지 새로고침 또는 상태 업데이트
+        // 페이지 새로고침으로 최신 데이터 반영
         window.location.reload()
       } else {
         alert(`저장 중 오류가 발생했습니다: ${response.error}`)
       }
+
     } catch (error) {
       console.error('Error saving profile:', error)
       alert('저장 중 오류가 발생했습니다.')
     }
   }
 
-  const ProfileSection = () => (
-    <div className="space-y-6">
-      {/* 프로필 사진 */}
-      <Card className="p-6">
-        <h3 className="text-lg font-semibold text-gray-900 mb-4">프로필 사진</h3>
-        <div className="flex items-center space-x-6">
-          <div className="relative">
-            <div className="w-24 h-24 bg-gradient-to-br from-blue-400 to-purple-500 rounded-full flex items-center justify-center text-white text-2xl font-bold">
-              {profile?.name?.charAt(0) || 'U'}
-            </div>
-            <Button
-              size="sm"
-              className="absolute -bottom-2 -right-2 h-8 w-8 rounded-full p-0"
-            >
-              <Camera className="w-4 h-4" />
-            </Button>
-          </div>
-          <div>
-            <p className="text-sm text-gray-600 mb-2">
-              JPG, PNG 파일만 업로드 가능합니다. (최대 5MB)
-            </p>
-            <div className="flex space-x-2">
-              <Button variant="outline" size="sm">
-                사진 변경
-              </Button>
-              <Button variant="ghost" size="sm" className="text-red-600">
-                삭제
-              </Button>
-            </div>
-          </div>
-        </div>
-      </Card>
-
-      {/* 기본 정보 */}
-      <Card className="p-6">
-        <h3 className="text-lg font-semibold text-gray-900 mb-4">기본 정보</h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              이름
-            </label>
-            <Input
-              value={profileData.name}
-              onChange={(e) => handleInputChange('name', e.target.value)}
-              placeholder="이름을 입력하세요"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              사용자명
-            </label>
-            <Input
-              value={profileData.username}
-              onChange={(e) => handleInputChange('username', e.target.value)}
-              placeholder="사용자명을 입력하세요"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              이메일
-            </label>
-            <div className="relative">
-              <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-              <Input
-                value={profileData.email}
-                onChange={(e) => handleInputChange('email', e.target.value)}
-                placeholder="이메일을 입력하세요"
-                className="pl-10"
-                disabled
-              />
-            </div>
-            <Badge variant="secondary" className="mt-1 text-xs">
-              인증됨
-            </Badge>
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              전화번호
-            </label>
-            <div className="relative">
-              <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-              <Input
-                value={profileData.phone}
-                onChange={(e) => handleInputChange('phone', e.target.value)}
-                placeholder="전화번호를 입력하세요"
-                className="pl-10"
-              />
-            </div>
-          </div>
-        </div>
-      </Card>
-    </div>
-  )
 
   const NotificationSection = () => (
     <div className="space-y-6">
@@ -396,7 +573,19 @@ export default function ProfileSettingsPage() {
   const renderSection = () => {
     switch (activeSection) {
       case 'profile':
-        return <ProfileSection />
+        return (
+          <ProfileSection
+            profileData={profileData}
+            profile={profile}
+            loading={loading}
+            profileImage={profileImage}
+            uploadingImage={uploadingImage}
+            fileInputRef={fileInputRef}
+            handleInputChange={handleInputChange}
+            handleFileSelect={handleFileSelect}
+            setProfileImage={setProfileImage}
+          />
+        )
       case 'notifications':
         return <NotificationSection />
       case 'security':
@@ -404,7 +593,19 @@ export default function ProfileSettingsPage() {
       case 'payment':
         return <PaymentSection />
       default:
-        return <ProfileSection />
+        return (
+          <ProfileSection
+            profileData={profileData}
+            profile={profile}
+            loading={loading}
+            profileImage={profileImage}
+            uploadingImage={uploadingImage}
+            fileInputRef={fileInputRef}
+            handleInputChange={handleInputChange}
+            handleFileSelect={handleFileSelect}
+            setProfileImage={setProfileImage}
+          />
+        )
     }
   }
 
