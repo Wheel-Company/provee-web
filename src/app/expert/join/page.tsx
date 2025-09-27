@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -14,11 +15,13 @@ import {
   Shield,
   Smartphone,
   CheckCircle,
-  ArrowRight
+  ArrowRight,
+  ArrowLeft
 } from 'lucide-react'
 
 export default function ExpertJoinPage() {
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null)
+  const router = useRouter()
 
   const successStories = [
     {
@@ -49,7 +52,32 @@ export default function ExpertJoinPage() {
 
   return (
     <div className="min-h-screen bg-white">
-      <SimpleHeader />
+      {/* Custom Header with Back Button */}
+      <header className="bg-white border-b border-gray-200 shadow-sm">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between h-16">
+            <div className="flex items-center">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => router.back()}
+                className="mr-4"
+              >
+                <ArrowLeft className="w-5 h-5 mr-2" />
+                뒤로
+              </Button>
+              <Link href="/">
+                <div className="flex items-center space-x-2">
+                  <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-500 to-green-500 flex items-center justify-center shadow-md">
+                    <span className="text-white font-bold text-sm">P</span>
+                  </div>
+                  <span className="font-bold text-gray-900 text-xl">Provee</span>
+                </div>
+              </Link>
+            </div>
+          </div>
+        </div>
+      </header>
 
       {/* Hero Section */}
       <section className="relative bg-gradient-to-r from-blue-600 to-teal-600 text-white py-20">

@@ -78,8 +78,9 @@ export default function RegisterPage() {
         return
       }
 
-      // 2. profiles 테이블에 추가 정보 저장
+      // 2. profiles 테이블에 추가 정보 저장 (이중 역할 시스템)
       if (authData.user) {
+        // 2-1. 기본 프로필 생성 (기본적으로 customer 역할)
         const { error: profileError } = await supabaseClient
           .from('profiles')
           .insert([
@@ -89,7 +90,7 @@ export default function RegisterPage() {
               email: formData.email,
               name: formData.name,
               phone: formData.phone,
-              user_type: formData.userType as 'customer' | 'expert',
+              user_type: 'customer', // 기본 역할은 고객
               created_at: new Date().toISOString(),
               updated_at: new Date().toISOString()
             }
@@ -104,6 +105,19 @@ export default function RegisterPage() {
           }
           setIsLoading(false)
           return
+        }
+
+        // 2-2. 전문가로 가입 선택시 추가 설정
+        if (formData.userType === 'expert') {
+          // user_type을 expert로 설정
+          const { error: activeRoleError } = await supabaseClient
+            .from('profiles')
+            .update({ user_type: 'expert' })
+            .eq('id', authData.user.id)
+
+          if (activeRoleError) {
+            console.error('Active role error:', activeRoleError)
+          }
         }
       }
 

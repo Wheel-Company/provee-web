@@ -127,7 +127,7 @@ export default function RequestsPage() {
       createdAt: '2025-09-20',
       description: '토익 점수 향상을 위한 영어 과외를 찾습니다.'
     }
-  ])
+  ]
 
   // Redirect if not logged in
   useEffect(() => {

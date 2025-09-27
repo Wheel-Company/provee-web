@@ -14,7 +14,9 @@ import {
   LogOut,
   Settings,
   Shield,
-  ChevronDown
+  ChevronDown,
+  RefreshCw,
+  UserPlus
 } from 'lucide-react'
 import {
   DropdownMenu,
@@ -84,10 +86,47 @@ const SearchBar: React.FC = () => {
 }
 
 const UserMenu: React.FC = () => {
-  const { profile, signOut } = useUser()
+  const { profile, signOut, switchRole, becomeExpert } = useUser()
   const [notificationCount] = useState(3)
+  const [isRoleSwitching, setIsRoleSwitching] = useState(false)
 
   if (!profile) return null
+
+  const handleRoleSwitch = async (newRole: 'customer' | 'expert') => {
+    setIsRoleSwitching(true)
+    try {
+      const result = await switchRole(newRole)
+      if (!result.success && result.error === 'Expert registration required') {
+        // 전문가 가입 플로우로 리다이렉트됨
+        return
+      }
+      if (!result.success) {
+        alert(`역할 전환 중 오류가 발생했습니다: ${result.error}`)
+      }
+    } catch (error) {
+      console.error('Role switch error:', error)
+      alert('역할 전환 중 오류가 발생했습니다.')
+    } finally {
+      setIsRoleSwitching(false)
+    }
+  }
+
+  const handleBecomeExpert = async () => {
+    setIsRoleSwitching(true)
+    try {
+      const result = await becomeExpert()
+      if (result.success) {
+        alert('전문가 등록이 완료되었습니다!')
+      } else {
+        alert(`전문가 등록 중 오류가 발생했습니다: ${result.error}`)
+      }
+    } catch (error) {
+      console.error('Become expert error:', error)
+      alert('전문가 등록 중 오류가 발생했습니다.')
+    } finally {
+      setIsRoleSwitching(false)
+    }
+  }
 
   return (
     <div className="flex items-center space-x-4">
@@ -105,8 +144,8 @@ const UserMenu: React.FC = () => {
       </Button>
 
       {/* 역할 배지 */}
-      <Badge variant={profile.user_type === 'expert' ? 'default' : 'secondary'}>
-        {profile.user_type === 'expert' ? '전문가' : '고객'}
+      <Badge variant={profile.current_role === 'expert' || profile.active_role === 'expert' ? 'default' : 'secondary'}>
+        {profile.current_role === 'expert' || profile.active_role === 'expert' ? '전문가' : '고객'}
       </Badge>
 
       {/* 프로필 드롭다운 */}
@@ -122,7 +161,7 @@ const UserMenu: React.FC = () => {
             <ChevronDown className="w-4 h-4" />
           </Button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent align="end" className="w-48">
+        <DropdownMenuContent align="end" className="w-56">
           <Link href="/profile">
             <DropdownMenuItem>
               <User className="w-4 h-4 mr-2" />
@@ -135,6 +174,82 @@ const UserMenu: React.FC = () => {
               설정
             </DropdownMenuItem>
           </Link>
+
+          <DropdownMenuSeparator />
+
+          {/* 역할 전환 섹션 */}
+          <div className="px-2 py-1.5">
+            <p className="text-xs font-medium text-gray-500 mb-2">역할 전환</p>
+
+            {/* 사용 가능한 역할 표시 */}
+            {profile.available_roles && profile.available_roles.length > 0 && (
+              <div className="mb-2">
+                <p className="text-xs text-gray-400">사용 가능한 역할:</p>
+                <div className="flex gap-1 mt-1">
+                  {profile.available_roles.map((role) => (
+                    <Badge
+                      key={role}
+                      variant="outline"
+                      className="text-xs"
+                    >
+                      {role === 'expert' ? '전문가' : '고객'}
+                    </Badge>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* 고객으로 전환 */}
+            {profile.available_roles?.includes('customer') &&
+             (profile.current_role === 'expert' || profile.active_role === 'expert') && (
+              <DropdownMenuItem
+                onClick={() => handleRoleSwitch('customer')}
+                disabled={isRoleSwitching}
+                className="text-sm"
+              >
+                <RefreshCw className={`w-4 h-4 mr-2 ${isRoleSwitching ? 'animate-spin' : ''}`} />
+                고객으로 전환
+              </DropdownMenuItem>
+            )}
+
+            {/* 전문가로 전환 */}
+            {profile.available_roles?.includes('expert') &&
+             (profile.current_role === 'customer' || profile.active_role === 'customer') && (
+              <DropdownMenuItem
+                onClick={() => handleRoleSwitch('expert')}
+                disabled={isRoleSwitching}
+                className="text-sm"
+              >
+                <RefreshCw className={`w-4 h-4 mr-2 ${isRoleSwitching ? 'animate-spin' : ''}`} />
+                전문가로 전환
+              </DropdownMenuItem>
+            )}
+
+            {/* 전문가 등록하기 */}
+            {!profile.available_roles?.includes('expert') && (
+              <Link href="/expert/join">
+                <DropdownMenuItem
+                  className="text-sm text-blue-600"
+                >
+                  <UserPlus className="w-4 h-4 mr-2" />
+                  전문가 등록하기
+                </DropdownMenuItem>
+              </Link>
+            )}
+
+            {/* 고객 등록하기 (전문가만 있는 경우) */}
+            {!profile.available_roles?.includes('customer') && profile.available_roles?.includes('expert') && (
+              <DropdownMenuItem
+                onClick={() => handleRoleSwitch('customer')}
+                disabled={isRoleSwitching}
+                className="text-sm text-green-600"
+              >
+                <UserPlus className={`w-4 h-4 mr-2 ${isRoleSwitching ? 'animate-spin' : ''}`} />
+                서비스 이용하기
+              </DropdownMenuItem>
+            )}
+          </div>
+
           <DropdownMenuSeparator />
           <DropdownMenuItem onClick={signOut}>
             <LogOut className="w-4 h-4 mr-2" />
@@ -166,7 +281,9 @@ const GuestActions: React.FC = () => {
   )
 }
 
-const Navigation: React.FC<{ userRole?: 'customer' | 'expert' }> = ({ userRole }) => {
+const Navigation: React.FC = () => {
+  const { profile } = useUser()
+  const userRole = profile?.active_role || profile?.current_role || profile?.user_type
   return (
     <nav className="hidden lg:flex items-center space-x-8">
       <Link href="/search">
@@ -273,7 +390,7 @@ const Header: React.FC<HeaderProps> = ({
             </Link>
 
             <div className="ml-8">
-              <Navigation userRole={profile?.user_type as 'customer' | 'expert'} />
+              <Navigation />
             </div>
           </div>
 
