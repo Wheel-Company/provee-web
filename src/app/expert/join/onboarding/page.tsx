@@ -1,7 +1,8 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
+import { useUser } from '@/hooks/useUser'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 // import { Progress } from '@/components/ui/progress'
@@ -35,6 +36,14 @@ const categories = [
 export default function ExpertOnboardingPage() {
   const [selectedCategories, setSelectedCategories] = useState<string[]>([])
   const router = useRouter()
+  const { user, profile, loading } = useUser()
+
+  // 로그인되지 않은 사용자는 auth 페이지로 리다이렉트
+  useEffect(() => {
+    if (!loading && !user) {
+      router.push('/expert/join/onboarding/auth')
+    }
+  }, [user, loading, router])
 
   const handleCategorySelect = (categoryId: string) => {
     setSelectedCategories(prev => {
@@ -58,6 +67,18 @@ export default function ExpertOnboardingPage() {
 
   const handleBack = () => {
     router.push('/expert/join')
+  }
+
+  // 로딩 중이거나 로그인되지 않은 경우 로딩 화면 표시
+  if (loading || !user) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">로딩 중...</p>
+        </div>
+      </div>
+    )
   }
 
   return (

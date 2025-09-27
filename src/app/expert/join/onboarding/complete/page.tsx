@@ -1,12 +1,54 @@
 'use client'
 
+import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { useUser } from '@/hooks/useUser'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { CheckCircle, Star, TrendingUp, Users, Gift } from 'lucide-react'
 
 export default function CompletePage() {
   const router = useRouter()
+  const { user, profile, becomeExpert } = useUser()
+  const [registering, setRegistering] = useState(false)
+  const [registrationComplete, setRegistrationComplete] = useState(false)
+
+  // 페이지 로드시 전문가 등록 처리
+  useEffect(() => {
+    const registerAsExpert = async () => {
+      if (!user || !profile) {
+        // 로그인되지 않은 경우 로그인 페이지로 리다이렉트
+        router.push('/auth/login')
+        return
+      }
+
+      // 이미 전문가인 경우 등록 완료 처리
+      if (profile.available_roles?.includes('expert') || profile.user_type === 'expert') {
+        setRegistrationComplete(true)
+        return
+      }
+
+      // 전문가 등록 진행
+      setRegistering(true)
+      try {
+        const result = await becomeExpert()
+        if (result.success) {
+          setRegistrationComplete(true)
+          console.log('전문가 등록 완료!')
+        } else {
+          console.error('전문가 등록 실패:', result.error)
+          alert('전문가 등록 중 오류가 발생했습니다. 다시 시도해주세요.')
+        }
+      } catch (error) {
+        console.error('전문가 등록 오류:', error)
+        alert('전문가 등록 중 오류가 발생했습니다. 다시 시도해주세요.')
+      } finally {
+        setRegistering(false)
+      }
+    }
+
+    registerAsExpert()
+  }, [user, profile, becomeExpert, router])
 
   const handleStartDashboard = () => {
     router.push('/expert')
@@ -14,6 +56,37 @@ export default function CompletePage() {
 
   const handleViewProfile = () => {
     router.push('/expert/profile')
+  }
+
+  // 등록 진행 중 로딩 화면
+  if (registering) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <h2 className="text-xl font-semibold text-gray-900 mb-2">전문가 등록 중...</h2>
+          <p className="text-gray-600">잠시만 기다려주세요.</p>
+        </div>
+      </div>
+    )
+  }
+
+  // 등록이 완료되지 않은 경우 (오류 상황)
+  if (!registrationComplete) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="text-red-600 mb-4">
+            <CheckCircle className="w-12 h-12 mx-auto opacity-50" />
+          </div>
+          <h2 className="text-xl font-semibold text-gray-900 mb-2">등록 처리 중입니다...</h2>
+          <p className="text-gray-600 mb-4">페이지를 새로고침하거나 잠시 후 다시 시도해주세요.</p>
+          <Button onClick={() => window.location.reload()}>
+            새로고침
+          </Button>
+        </div>
+      </div>
+    )
   }
 
   return (

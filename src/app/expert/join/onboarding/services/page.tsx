@@ -37,7 +37,8 @@ export default function ServicesPage() {
     }
     // TODO: 선택된 서비스 저장하고 다음 단계로 이동
     console.log('Selected services:', selectedServices)
-    router.push('/expert/join/onboarding/auth')
+    // 이미 로그인된 사용자는 auth, profile 단계를 건너뛰고 완료로 이동
+    router.push('/expert/join/onboarding/complete')
   }
 
   const handleBack = () => {

@@ -227,7 +227,7 @@ const UserMenu: React.FC = () => {
 
             {/* 전문가 등록하기 */}
             {!profile.available_roles?.includes('expert') && (
-              <Link href="/expert/join">
+              <Link href="/expert/join/onboarding">
                 <DropdownMenuItem
                   className="text-sm text-blue-600"
                 >
