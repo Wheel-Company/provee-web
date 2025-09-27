@@ -23,6 +23,7 @@ import {
   Globe
 } from 'lucide-react'
 import { useUser } from '@/hooks/useUser'
+import ProveeAPI from '@/lib/api'
 
 interface SettingSection {
   id: string
@@ -76,10 +77,27 @@ export default function ProfileSettingsPage() {
     }))
   }
 
-  const handleSave = () => {
-    // TODO: 실제 저장 로직 구현
-    console.log('Saving profile data:', profileData)
-    alert('설정이 저장되었습니다.')
+  const handleSave = async () => {
+    try {
+      const updates = {
+        name: profileData.name,
+        username: profileData.username,
+        phone: profileData.phone
+      }
+
+      const response = await ProveeAPI.updateProfile(updates)
+
+      if (response.success) {
+        alert('설정이 저장되었습니다.')
+        // 프로필 다시 로드하기 위해 페이지 새로고침 또는 상태 업데이트
+        window.location.reload()
+      } else {
+        alert(`저장 중 오류가 발생했습니다: ${response.error}`)
+      }
+    } catch (error) {
+      console.error('Error saving profile:', error)
+      alert('저장 중 오류가 발생했습니다.')
+    }
   }
 
   const ProfileSection = () => (

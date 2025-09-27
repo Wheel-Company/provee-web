@@ -678,15 +678,10 @@ export default function ExpertDetailPage() {
                 ))}
               </div>
 
-              <div className="flex justify-center space-x-4 mt-6">
+              <div className="text-center mt-6">
                 <Button variant="outline">
                   더 많은 리뷰 보기
                 </Button>
-                <Link href={`/expert/${expert.id}/review`}>
-                  <Button>
-                    리뷰 작성하기
-                  </Button>
-                </Link>
               </div>
             </Card>
 

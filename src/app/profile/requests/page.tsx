@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { useUser } from '@/hooks/useUser'
+import { EnhancedProveeAPI } from '@/lib/api-enhanced'
 import {
   ArrowLeft,
   Clock,
@@ -38,11 +39,55 @@ interface QuoteRequest {
 
 export default function RequestsPage() {
   const router = useRouter()
-  const { user, loading } = useUser()
+  const { user, profile, loading } = useUser()
   const [activeFilter, setActiveFilter] = useState('all')
+  const [requests, setRequests] = useState<QuoteRequest[]>([])
+  const [loadingRequests, setLoadingRequests] = useState(true)
+  const [error, setError] = useState<string | null>(null)
 
-  // Mock data - 실제로는 API에서 가져와야 함
-  const [requests] = useState<QuoteRequest[]>([
+  // Load customer requests from database
+  useEffect(() => {
+    const loadRequests = async () => {
+      if (!user || !profile) return
+
+      try {
+        setLoadingRequests(true)
+        const response = await EnhancedProveeAPI.getCustomerRequests(user.id)
+
+        if (response.success && response.data) {
+          // Transform data to match interface
+          const transformedRequests = response.data.requests.map((req: any) => ({
+            id: req.id,
+            title: req.title,
+            category: req.category,
+            subcategory: req.subcategory || '',
+            location: req.location,
+            date: req.preferred_date,
+            budget: req.budget_min && req.budget_max
+              ? `${Math.floor(req.budget_min / 10000)}-${Math.floor(req.budget_max / 10000)}만원`
+              : '예산 미정',
+            status: req.status,
+            quotesCount: 0, // Will be updated with actual quotes count
+            createdAt: new Date(req.created_at).toLocaleDateString('ko-KR'),
+            description: req.description
+          }))
+          setRequests(transformedRequests)
+        } else {
+          setError(response.error || '요청을 불러오는데 실패했습니다.')
+        }
+      } catch (err) {
+        setError('요청을 불러오는데 실패했습니다.')
+        console.error('Load requests error:', err)
+      } finally {
+        setLoadingRequests(false)
+      }
+    }
+
+    loadRequests()
+  }, [user, profile])
+
+  // Mock data for fallback
+  const mockRequests: QuoteRequest[] = [
     {
       id: '1',
       title: '투룸 포장이사',
@@ -181,9 +226,35 @@ export default function RequestsPage() {
           ))}
         </div>
 
+        {/* Loading State */}
+        {loadingRequests && (
+          <div className="text-center py-12">
+            <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+            <p className="mt-2 text-gray-600">요청 목록을 불러오고 있습니다...</p>
+          </div>
+        )}
+
+        {/* Error State */}
+        {error && (
+          <Card className="p-8 text-center">
+            <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <span className="text-red-500 text-2xl">⚠️</span>
+            </div>
+            <h3 className="text-lg font-medium text-gray-900 mb-2">오류가 발생했습니다</h3>
+            <p className="text-gray-600 mb-6">{error}</p>
+            <Button
+              onClick={() => window.location.reload()}
+              variant="outline"
+            >
+              다시 시도
+            </Button>
+          </Card>
+        )}
+
         {/* Requests List */}
-        <div className="space-y-4">
-          {filteredRequests.length === 0 ? (
+        {!loadingRequests && !error && (
+          <div className="space-y-4">
+            {filteredRequests.length === 0 ? (
             <Card className="p-12 text-center">
               <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
                 <MessageSquare className="w-8 h-8 text-gray-400" />
@@ -315,7 +386,8 @@ export default function RequestsPage() {
               </Card>
             ))
           )}
-        </div>
+          </div>
+        )}
       </div>
     </div>
   )

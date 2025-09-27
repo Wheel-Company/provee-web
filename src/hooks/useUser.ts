@@ -49,15 +49,19 @@ export function useUser() {
 
   const fetchProfile = async (userId: string) => {
     try {
+      console.log('Fetching profile for user ID:', userId)
       const { data, error } = await supabaseClient
         .from('profiles')
         .select('id, username, email, name, phone, user_type')
         .eq('id', userId)
         .single()
 
+      console.log('Profile query result:', { data, error })
+
       if (error) {
         console.error('Error fetching profile:', error)
       } else {
+        console.log('Setting profile data:', data)
         setProfile(data)
       }
     } catch (error) {

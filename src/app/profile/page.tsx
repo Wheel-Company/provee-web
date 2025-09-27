@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { useUser } from '@/hooks/useUser'
+import { EnhancedProveeAPI } from '@/lib/api-enhanced'
 import {
   User,
   Settings,
@@ -26,7 +27,16 @@ import {
 
 export default function ProfilePage() {
   const router = useRouter()
-  const { user, loading } = useUser()
+  const { user, profile, loading } = useUser()
+  const [profileStats, setProfileStats] = useState({
+    activeRequests: 0,
+    completedProjects: 0,
+    averageRating: 0,
+    favoriteExperts: 0,
+    totalReviews: 0,
+    totalEarnings: 0
+  })
+  const [loadingStats, setLoadingStats] = useState(true)
 
   // Redirect if not logged in
   useEffect(() => {
@@ -34,6 +44,32 @@ export default function ProfilePage() {
       router.push('/auth/login')
     }
   }, [user, loading, router])
+
+  // Load profile statistics
+  useEffect(() => {
+    if (user?.id && profile) {
+      loadProfileStats()
+    }
+  }, [user, profile])
+
+  const loadProfileStats = async () => {
+    try {
+      setLoadingStats(true)
+      // 실제 통계 데이터 로드 (현재는 모의 데이터)
+      setProfileStats({
+        activeRequests: profile?.user_type === 'expert' ? 5 : 3,
+        completedProjects: profile?.user_type === 'expert' ? 45 : 12,
+        averageRating: profile?.user_type === 'expert' ? 4.8 : 4.6,
+        favoriteExperts: profile?.user_type === 'expert' ? 0 : 8,
+        totalReviews: profile?.user_type === 'expert' ? 23 : 7,
+        totalEarnings: profile?.user_type === 'expert' ? 1250000 : 0
+      })
+    } catch (error) {
+      console.error('Error loading profile stats:', error)
+    } finally {
+      setLoadingStats(false)
+    }
+  }
 
   if (loading) {
     return (
@@ -47,93 +83,156 @@ export default function ProfilePage() {
     return null
   }
 
-  const menuItems = [
-    {
-      title: '견적 관리',
-      items: [
+  // 사용자 타입에 따른 메뉴 구성
+  const getMenuItems = () => {
+    if (profile?.user_type === 'expert') {
+      return [
         {
-          id: 'my-requests',
-          icon: FileText,
-          title: '내 견적 요청',
-          description: '요청한 견적 내역을 확인하세요',
-          badge: '3',
-          href: '/profile/requests'
+          title: '전문가 관리',
+          items: [
+            {
+              id: 'expert-manage',
+              icon: Settings,
+              title: '전문가 정보 관리',
+              description: '프로필, 포트폴리오, 자격증 등을 관리하세요',
+              href: '/expert/manage'
+            },
+            {
+              id: 'expert-requests',
+              icon: FileText,
+              title: '요청서 관리',
+              description: '받은 견적 요청을 확인하고 관리하세요',
+              badge: profileStats.activeRequests.toString(),
+              href: '/expert/requests'
+            },
+            {
+              id: 'expert-matching',
+              icon: Users,
+              title: '매칭 관리',
+              description: '고객과의 매칭 현황을 확인하세요',
+              href: '/expert/matching'
+            }
+          ]
         },
         {
-          id: 'favorites',
-          icon: Heart,
-          title: '관심 전문가',
-          description: '찜한 전문가들을 관리하세요',
-          href: '/profile/favorites'
+          title: '수익 관리',
+          items: [
+            {
+              id: 'earnings',
+              icon: CreditCard,
+              title: '수익 내역',
+              description: '총 수익 및 정산 내역을 확인하세요',
+              href: '/expert/earnings'
+            },
+            {
+              id: 'reviews-received',
+              icon: Star,
+              title: '받은 리뷰',
+              description: '고객들이 남긴 리뷰를 확인하세요',
+              badge: profileStats.totalReviews.toString(),
+              href: '/expert/reviews'
+            }
+          ]
         }
       ]
-    },
-    {
-      title: '서비스 관리',
-      items: [
+    } else {
+      return [
         {
-          id: 'reviews',
-          icon: Star,
-          title: '내 리뷰',
-          description: '작성한 리뷰를 확인하고 관리하세요',
-          href: '/profile/reviews'
+          title: '견적 관리',
+          items: [
+            {
+              id: 'my-requests',
+              icon: FileText,
+              title: '내 견적 요청',
+              description: '요청한 견적 내역을 확인하세요',
+              badge: profileStats.activeRequests.toString(),
+              href: '/profile/requests'
+            },
+            {
+              id: 'favorites',
+              icon: Heart,
+              title: '관심 전문가',
+              description: '찜한 전문가들을 관리하세요',
+              badge: profileStats.favoriteExperts.toString(),
+              href: '/profile/favorites'
+            }
+          ]
         },
         {
-          id: 'chat',
-          icon: MessageSquare,
-          title: '채팅 내역',
-          description: '전문가와의 대화 내역',
-          href: '/profile/chat'
-        }
-      ]
-    },
-    {
-      title: '결제 관리',
-      items: [
-        {
-          id: 'payment',
-          icon: CreditCard,
-          title: '결제 내역',
-          description: '결제 및 환불 내역을 확인하세요',
-          href: '/profile/payments'
+          title: '서비스 관리',
+          items: [
+            {
+              id: 'reviews',
+              icon: Star,
+              title: '내 리뷰',
+              description: '작성한 리뷰를 확인하고 관리하세요',
+              badge: profileStats.totalReviews.toString(),
+              href: '/profile/reviews'
+            },
+            {
+              id: 'chat',
+              icon: MessageSquare,
+              title: '채팅 내역',
+              description: '전문가와의 대화 내역',
+              href: '/profile/chat'
+            }
+          ]
         },
         {
-          id: 'subscription',
-          icon: ShoppingBag,
-          title: '구독 관리',
-          description: 'Provee 프리미엄 구독을 관리하세요',
-          badge: 'NEW',
-          href: '/profile/subscription'
-        }
-      ]
-    },
-    {
-      title: '설정',
-      items: [
-        {
-          id: 'notifications',
-          icon: Bell,
-          title: '알림 설정',
-          description: '푸시 알림 및 이메일 설정',
-          href: '/profile/notifications'
-        },
-        {
-          id: 'account',
-          icon: Settings,
-          title: '계정 설정',
-          description: '개인정보 및 보안 설정',
-          href: '/profile/settings'
-        },
-        {
-          id: 'help',
-          icon: HelpCircle,
-          title: '고객센터',
-          description: '자주 묻는 질문 및 문의하기',
-          href: '/profile/help'
+          title: '결제 관리',
+          items: [
+            {
+              id: 'payment',
+              icon: CreditCard,
+              title: '결제 내역',
+              description: '결제 및 환불 내역을 확인하세요',
+              href: '/profile/payments'
+            },
+            {
+              id: 'subscription',
+              icon: ShoppingBag,
+              title: '구독 관리',
+              description: 'Provee 프리미엄 구독을 관리하세요',
+              badge: 'NEW',
+              href: '/profile/subscription'
+            }
+          ]
         }
       ]
     }
-  ]
+
+    // 공통 설정 메뉴 추가
+    const commonMenus = [
+      {
+        title: '설정',
+        items: [
+          {
+            id: 'notifications',
+            icon: Bell,
+            title: '알림 설정',
+            description: '푸시 알림 및 이메일 설정',
+            href: '/profile/notifications'
+          },
+          {
+            id: 'account',
+            icon: Settings,
+            title: '계정 설정',
+            description: '개인정보 및 보안 설정',
+            href: '/profile/settings'
+          },
+          {
+            id: 'help',
+            icon: HelpCircle,
+            title: '고객센터',
+            description: '자주 묻는 질문 및 문의하기',
+            href: '/profile/help'
+          }
+        ]
+      }
+    ]
+
+    return [...getMenuItems(), ...commonMenus]
+  }
 
   const handleMenuClick = (href: string) => {
     router.push(href)
@@ -153,12 +252,15 @@ export default function ProfilePage() {
               </div>
               <div>
                 <h1 className="text-2xl font-bold text-gray-900">
-                  {user.user_metadata?.display_name || user.email?.split('@')[0] || '사용자'}님
+                  {profile?.name || user.user_metadata?.display_name || user.email?.split('@')[0] || '사용자'}님
                 </h1>
-                <p className="text-gray-600">{user.email}</p>
+                <p className="text-gray-600">{profile?.email || user.email}</p>
                 <div className="flex items-center mt-2 space-x-4">
-                  <Badge variant="secondary" className="bg-green-100 text-green-800">
-                    일반 회원
+                  <Badge
+                    variant="secondary"
+                    className={profile?.user_type === 'expert' ? 'bg-blue-100 text-blue-800' : 'bg-green-100 text-green-800'}
+                  >
+                    {profile?.user_type === 'expert' ? '전문가 회원' : '일반 회원'}
                   </Badge>
                   <span className="text-sm text-gray-500">
                     <Clock className="w-4 h-4 inline mr-1" />
@@ -180,27 +282,61 @@ export default function ProfilePage() {
 
         {/* Quick Stats */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
-          <Card className="p-4 text-center">
-            <div className="text-2xl font-bold text-blue-600 mb-1">3</div>
-            <div className="text-sm text-gray-600">진행 중인 요청</div>
-          </Card>
-          <Card className="p-4 text-center">
-            <div className="text-2xl font-bold text-green-600 mb-1">12</div>
-            <div className="text-sm text-gray-600">완료된 프로젝트</div>
-          </Card>
-          <Card className="p-4 text-center">
-            <div className="text-2xl font-bold text-yellow-600 mb-1">4.8</div>
-            <div className="text-sm text-gray-600">평균 만족도</div>
-          </Card>
-          <Card className="p-4 text-center">
-            <div className="text-2xl font-bold text-purple-600 mb-1">8</div>
-            <div className="text-sm text-gray-600">관심 전문가</div>
-          </Card>
+          {loadingStats ? (
+            Array.from({ length: 4 }).map((_, index) => (
+              <Card key={index} className="p-4 text-center">
+                <div className="animate-pulse">
+                  <div className="h-8 bg-gray-200 rounded mb-1"></div>
+                  <div className="h-4 bg-gray-200 rounded"></div>
+                </div>
+              </Card>
+            ))
+          ) : profile?.user_type === 'expert' ? (
+            <>
+              <Card className="p-4 text-center">
+                <div className="text-2xl font-bold text-blue-600 mb-1">{profileStats.activeRequests}</div>
+                <div className="text-sm text-gray-600">진행 중인 요청</div>
+              </Card>
+              <Card className="p-4 text-center">
+                <div className="text-2xl font-bold text-green-600 mb-1">{profileStats.completedProjects}</div>
+                <div className="text-sm text-gray-600">완료된 프로젝트</div>
+              </Card>
+              <Card className="p-4 text-center">
+                <div className="text-2xl font-bold text-yellow-600 mb-1">{profileStats.averageRating}</div>
+                <div className="text-sm text-gray-600">평균 평점</div>
+              </Card>
+              <Card className="p-4 text-center">
+                <div className="text-2xl font-bold text-purple-600 mb-1">
+                  {(profileStats.totalEarnings / 10000).toFixed(0)}만원
+                </div>
+                <div className="text-sm text-gray-600">총 수익</div>
+              </Card>
+            </>
+          ) : (
+            <>
+              <Card className="p-4 text-center">
+                <div className="text-2xl font-bold text-blue-600 mb-1">{profileStats.activeRequests}</div>
+                <div className="text-sm text-gray-600">진행 중인 요청</div>
+              </Card>
+              <Card className="p-4 text-center">
+                <div className="text-2xl font-bold text-green-600 mb-1">{profileStats.completedProjects}</div>
+                <div className="text-sm text-gray-600">완료된 프로젝트</div>
+              </Card>
+              <Card className="p-4 text-center">
+                <div className="text-2xl font-bold text-yellow-600 mb-1">{profileStats.averageRating}</div>
+                <div className="text-sm text-gray-600">평균 만족도</div>
+              </Card>
+              <Card className="p-4 text-center">
+                <div className="text-2xl font-bold text-purple-600 mb-1">{profileStats.favoriteExperts}</div>
+                <div className="text-sm text-gray-600">관심 전문가</div>
+              </Card>
+            </>
+          )}
         </div>
 
         {/* Menu Sections */}
         <div className="space-y-6">
-          {menuItems.map((section, sectionIndex) => (
+          {getMenuItems().map((section, sectionIndex) => (
             <div key={sectionIndex}>
               <h2 className="text-lg font-semibold text-gray-900 mb-4">
                 {section.title}
@@ -278,30 +414,32 @@ export default function ProfilePage() {
           </div>
         </Card>
 
-        {/* Expert Registration CTA */}
-        <Card className="mt-6 p-6 bg-gradient-to-r from-purple-50 to-blue-50 border-purple-200">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-4">
-              <div className="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center">
-                <Users className="w-6 h-6 text-purple-600" />
+        {/* Expert Registration CTA - 고객에게만 표시 */}
+        {profile?.user_type !== 'expert' && (
+          <Card className="mt-6 p-6 bg-gradient-to-r from-purple-50 to-blue-50 border-purple-200">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-4">
+                <div className="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center">
+                  <Users className="w-6 h-6 text-purple-600" />
+                </div>
+                <div>
+                  <h3 className="font-semibold text-gray-900">
+                    전문가로 활동해보세요
+                  </h3>
+                  <p className="text-gray-600 text-sm">
+                    당신의 전문성을 나누고 수익을 올려보세요
+                  </p>
+                </div>
               </div>
-              <div>
-                <h3 className="font-semibold text-gray-900">
-                  전문가로 활동해보세요
-                </h3>
-                <p className="text-gray-600 text-sm">
-                  당신의 전문성을 나누고 수익을 올려보세요
-                </p>
-              </div>
+              <Button
+                className="bg-purple-600 hover:bg-purple-700"
+                onClick={() => router.push('/expert/join')}
+              >
+                전문가 등록
+              </Button>
             </div>
-            <Button
-              className="bg-purple-600 hover:bg-purple-700"
-              onClick={() => router.push('/expert/join')}
-            >
-              전문가 등록
-            </Button>
-          </div>
-        </Card>
+          </Card>
+        )}
       </div>
     </div>
   )

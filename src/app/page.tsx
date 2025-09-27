@@ -1,7 +1,8 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
+import ProveeAPI from '@/lib/api'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -33,19 +34,37 @@ export default function HomePage() {
   const router = useRouter()
   const [searchQuery, setSearchQuery] = useState('')
 
-  // 메인 카테고리
-  const mainCategories = [
-    { name: '이사/청소', icon: Home, color: 'bg-blue-100 text-blue-600' },
-    { name: '인테리어', icon: Brush, color: 'bg-green-100 text-green-600' },
-    { name: '이벤트/파티', icon: Calendar, color: 'bg-purple-100 text-purple-600' },
-    { name: '과외', icon: GraduationCap, color: 'bg-yellow-100 text-yellow-600' },
-    { name: '자동차', icon: Car, color: 'bg-red-100 text-red-600' },
-    { name: '설치/수리', icon: Settings, color: 'bg-indigo-100 text-indigo-600' },
-    { name: '외주', icon: Zap, color: 'bg-orange-100 text-orange-600' },
-    { name: '취업/직무', icon: Briefcase, color: 'bg-teal-100 text-teal-600' },
-    { name: '법률/금융', icon: Scale, color: 'bg-gray-100 text-gray-600' },
-    { name: '취미/자기계발', icon: Heart, color: 'bg-pink-100 text-pink-600' }
-  ]
+  // 카테고리 상태
+  const [categories, setCategories] = useState<{
+    name: string;
+    value: any;
+  }[]>([])
+  const [loadingCategories, setLoadingCategories] = useState(true)
+
+  // 카테고리 아이콘 매핑
+  const categoryIcons = {
+    '청소': { icon: Home, color: 'bg-blue-100 text-blue-600' },
+    '수리': { icon: Settings, color: 'bg-indigo-100 text-indigo-600' },
+    '과외': { icon: GraduationCap, color: 'bg-yellow-100 text-yellow-600' },
+    '디자인': { icon: Brush, color: 'bg-green-100 text-green-600' },
+  }
+
+  // 카테고리 로드
+  useEffect(() => {
+    const loadCategories = async () => {
+      try {
+        const response = await ProveeAPI.getServiceCategories()
+        if (response.success && response.data) {
+          setCategories(response.data)
+        }
+      } catch (error) {
+        console.error('Failed to load categories:', error)
+      } finally {
+        setLoadingCategories(false)
+      }
+    }
+    loadCategories()
+  }, [])
 
   // 실시간 요청
   const liveRequests = [
@@ -167,25 +186,36 @@ export default function HomePage() {
             어떤 서비스를 찾고 계신가요?
           </h2>
 
-          <div className="grid grid-cols-2 md:grid-cols-5 gap-6">
-            {mainCategories.map((category, index) => {
-              const Icon = category.icon
-              return (
-                <Card
-                  key={index}
-                  className="p-6 hover:shadow-lg transition-shadow cursor-pointer group"
-                  onClick={() => router.push(`/request?category=${encodeURIComponent(category.name)}`)}
-                >
-                  <div className="text-center">
-                    <div className={`w-12 h-12 rounded-lg ${category.color} flex items-center justify-center mx-auto mb-3 group-hover:scale-110 transition-transform`}>
-                      <Icon className="w-6 h-6" />
+          {loadingCategories ? (
+            <div className="text-center py-8">
+              <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+              <p className="mt-2 text-gray-600">카테고리를 불러오는 중...</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+              {categories.map((category, index) => {
+                const iconConfig = categoryIcons[category.name as keyof typeof categoryIcons] || {
+                  icon: Settings,
+                  color: 'bg-gray-100 text-gray-600'
+                }
+                const Icon = iconConfig.icon
+                return (
+                  <Card
+                    key={index}
+                    className="p-6 hover:shadow-lg transition-shadow cursor-pointer group"
+                    onClick={() => router.push(`/search?category=${encodeURIComponent(category.name)}`)}
+                  >
+                    <div className="text-center">
+                      <div className={`w-12 h-12 rounded-lg ${iconConfig.color} flex items-center justify-center mx-auto mb-3 group-hover:scale-110 transition-transform`}>
+                        <Icon className="w-6 h-6" />
+                      </div>
+                      <h3 className="font-medium text-gray-900">{category.name}</h3>
                     </div>
-                    <h3 className="font-medium text-gray-900">{category.name}</h3>
-                  </div>
-                </Card>
-              )
-            })}
-          </div>
+                  </Card>
+                )
+              })}
+            </div>
+          )}
         </div>
       </section>
 

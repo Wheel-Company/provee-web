@@ -205,6 +205,11 @@ const Navigation: React.FC<{ userRole?: 'customer' | 'expert' }> = ({ userRole }
               매칭 관리
             </Button>
           </Link>
+          <Link href="/expert/manage">
+            <Button variant="ghost" className="text-gray-700 hover:text-blue-600">
+              내 정보 관리
+            </Button>
+          </Link>
         </>
       )}
     </nav>

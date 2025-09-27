@@ -3,6 +3,8 @@
 import { useState, useEffect, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { Header } from '@/components/layout/header'
+import { EnhancedProveeAPI } from '@/lib/api-enhanced'
+import { useUser } from '@/hooks/useUser'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Progress } from '@/components/ui/progress'
@@ -40,8 +42,10 @@ interface QuoteRequest {
 function RequestQuotePageContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
+  const { user, profile } = useUser()
   const [currentStep, setCurrentStep] = useState(1)
   const [progress, setProgress] = useState(12)
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
   const [requestData, setRequestData] = useState<QuoteRequest>({
     category: '',
@@ -68,6 +72,69 @@ function RequestQuotePageContent() {
       }
     }
   }, [searchParams, currentStep])
+
+  // Submit request to database
+  const handleSubmitRequest = async () => {
+    if (!user || !profile) {
+      alert('로그인이 필요합니다.')
+      router.push('/auth/login')
+      return
+    }
+
+    if (profile.user_type !== 'customer') {
+      alert('고객만 견적을 요청할 수 있습니다.')
+      return
+    }
+
+    setIsSubmitting(true)
+
+    try {
+      // Parse budget
+      const budgetRanges = {
+        '10만원 이하': { min: 0, max: 100000 },
+        '10-30만원': { min: 100000, max: 300000 },
+        '30-50만원': { min: 300000, max: 500000 },
+        '50-100만원': { min: 500000, max: 1000000 },
+        '100만원 이상': { min: 1000000, max: null }
+      }
+
+      const budgetRange = budgetRanges[requestData.budget as keyof typeof budgetRanges] || { min: 0, max: null }
+
+      // Create request data
+      const submitData = {
+        customer_id: user.id,
+        category: requestData.category,
+        subcategory: requestData.subcategory,
+        title: `${requestData.category} 서비스 요청`,
+        description: requestData.details?.description || '',
+        location: requestData.location,
+        preferred_date: requestData.date,
+        specific_date: requestData.details?.specificDate,
+        budget_min: budgetRange.min,
+        budget_max: budgetRange.max,
+        contact_preference: requestData.contactPreference,
+        details: requestData.details
+      }
+
+      console.log('Submitting request:', submitData)
+
+      const response = await EnhancedProveeAPI.submitRequest(submitData)
+
+      if (response.success) {
+        console.log('Request submitted successfully:', response.data)
+        setCurrentStep(8)
+        setProgress(100)
+      } else {
+        console.error('Failed to submit request:', response.error)
+        alert('견적 요청 중 오류가 발생했습니다: ' + response.error)
+      }
+    } catch (error) {
+      console.error('Submit request error:', error)
+      alert('견적 요청 중 오류가 발생했습니다.')
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
 
   // 메인 카테고리 (숨고와 동일한 10개)
   const mainCategories = [
@@ -767,13 +834,11 @@ function RequestQuotePageContent() {
               </Button>
 
               <Button
-                onClick={() => {
-                  setCurrentStep(8)
-                  setProgress(100)
-                }}
-                className="px-8 bg-green-600 hover:bg-green-700"
+                onClick={handleSubmitRequest}
+                disabled={isSubmitting}
+                className="px-8 bg-green-600 hover:bg-green-700 disabled:opacity-50"
               >
-                견적 요청하기
+                {isSubmitting ? '요청 중...' : '견적 요청하기'}
                 <Send className="w-4 h-4 ml-2" />
               </Button>
             </div>
