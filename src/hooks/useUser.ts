@@ -12,10 +12,12 @@ interface UserProfile {
   name: string | null
   phone: string | null
   user_type: string | null
-  current_role: string | null
+  active_role: string | null
   available_roles: string[] | null
   is_expert: boolean | null
   is_customer: boolean | null
+  expert_active: boolean | null
+  expert_verification_status: string | null
 }
 
 export function useUser() {
@@ -54,35 +56,60 @@ export function useUser() {
   const fetchProfile = async (userId: string) => {
     try {
       console.log('Fetching profile for user ID:', userId)
-      const { data, error } = await supabaseClient
+
+      // 먼저 user_roles_view에서 조회 시도
+      let { data, error } = await supabaseClient
         .from('user_roles_view')
         .select('*')
         .eq('id', userId)
         .single()
 
-      console.log('Profile query result:', { data, error })
-
+      // user_roles_view가 없는 경우 기본 profiles 테이블에서 조회하고 expert 여부 확인
       if (error) {
-        console.error('Error fetching profile:', error)
-        // Fallback to basic profiles table if view doesn't exist yet
-        const { data: basicData, error: basicError } = await supabaseClient
+        console.log('user_roles_view not found, using basic query with expert check')
+
+        // profiles 테이블에서 기본 정보 조회
+        const { data: profileData, error: profileError } = await supabaseClient
           .from('profiles')
-          .select('id, username, email, name, phone, user_type')
+          .select('id, username, email, name, phone, user_type, active_role')
           .eq('id', userId)
           .single()
 
-        if (!basicError && basicData) {
-          setProfile({
-            ...basicData,
-            current_role: basicData.user_type,
-            available_roles: [basicData.user_type || 'customer'],
-            is_expert: basicData.user_type === 'expert',
-            is_customer: basicData.user_type === 'customer' || !basicData.user_type
-          })
+        if (profileError) {
+          console.error('Error fetching profile:', profileError)
+          setProfile(null)
+          return
         }
-      } else {
+
+        // expert_profiles 테이블에서 expert 여부 확인
+        const { data: expertData, error: expertError } = await supabaseClient
+          .from('expert_profiles')
+          .select('profile_id, is_active, verification_status')
+          .eq('profile_id', userId)
+          .single()
+
+        // 결과 조합
+        data = {
+          ...profileData,
+          available_roles: expertData && !expertError ? ['customer', 'expert'] : ['customer'],
+          is_expert: !!(expertData && !expertError),
+          is_customer: true,
+          expert_active: expertData?.is_active || false,
+          expert_verification_status: expertData?.verification_status || null
+        }
+      }
+
+      console.log('Profile query result:', { data, error })
+
+      if (data) {
         console.log('Setting profile data:', data)
+        console.log('User type from database:', data?.user_type)
+        console.log('Active role from database:', data?.active_role)
+        console.log('Available roles:', data?.available_roles)
+        console.log('Is expert:', data?.is_expert)
         setProfile(data)
+      } else {
+        setProfile(null)
       }
     } catch (error) {
       console.error('Error fetching profile:', error)
@@ -105,32 +132,14 @@ export function useUser() {
     if (!user || !profile) return { success: false, error: 'No user logged in' }
 
     try {
-      // 사용자가 해당 역할을 가지고 있는지 확인
-      const hasRole = profile.available_roles?.includes(newRole)
-
-      if (!hasRole) {
-        if (newRole === 'expert') {
-          // 전문가 역할이 없는 경우 전문가 가입 플로우로 리다이렉트
-          router.push('/expert/join')
-          return { success: false, error: 'Expert registration required' }
-        } else {
-          // 고객 역할이 없는 경우 추가 (기본적으로 모든 사용자는 고객 역할 가능)
-          const { error: roleError } = await supabaseClient
-            .from('user_roles')
-            .insert({
-              user_id: user.id,
-              role: 'customer',
-              is_active: true
-            })
-
-          if (roleError && !roleError.message.includes('duplicate')) {
-            console.error('Error adding customer role:', roleError)
-            return { success: false, error: roleError.message }
-          }
-        }
+      // 전문가로 전환하려는 경우 expert 등록 여부 확인
+      if (newRole === 'expert' && !profile.is_expert) {
+        router.push('/expert/join')
+        return { success: false, error: 'Expert registration required' }
       }
 
-      // active_role 업데이트
+      // active_role 업데이트 (user_type은 그대로 유지)
+      console.log('Updating active_role to:', newRole, 'for user:', user.id)
       const { error } = await supabaseClient
         .from('profiles')
         .update({ active_role: newRole })
@@ -141,6 +150,7 @@ export function useUser() {
         return { success: false, error: error.message }
       }
 
+      console.log('Role updated successfully, fetching profile...')
       // 프로필 새로고침
       await fetchProfile(user.id)
 
@@ -155,42 +165,31 @@ export function useUser() {
     if (!user) return { success: false, error: 'No user logged in' }
 
     try {
-      // 1. user_roles 테이블에 expert 역할 추가
-      const { error: roleError } = await supabaseClient
-        .from('user_roles')
-        .insert({
-          user_id: user.id,
-          role: 'expert',
-          is_active: true
-        })
-
-      if (roleError && !roleError.message.includes('duplicate')) {
-        console.error('Error adding expert role:', roleError)
-        return { success: false, error: roleError.message }
-      }
-
-      // 2. expert_profiles 테이블에 기본 전문가 프로필 생성
-      const { error: profileError } = await supabaseClient
+      // expert_profiles 테이블에 레코드 생성 (이미 있으면 무시)
+      const { error: expertError } = await supabaseClient
         .from('expert_profiles')
         .insert({
-          id: user.id,
+          profile_id: user.id,
+          title: '전문가',
+          description: '',
           is_active: true,
-          is_accepting_requests: true
+          verification_status: 'pending'
         })
 
-      if (profileError && !profileError.message.includes('duplicate')) {
-        console.error('Error creating expert profile:', profileError)
-        return { success: false, error: profileError.message }
+      // 중복 삽입 에러는 무시 (이미 expert_profiles에 있는 경우)
+      if (expertError && !expertError.message.includes('duplicate') && !expertError.message.includes('already exists')) {
+        console.error('Error creating expert profile:', expertError)
+        return { success: false, error: expertError.message }
       }
 
-      // 3. active_role을 expert로 변경
+      // active_role을 expert로 설정
       const { error: updateError } = await supabaseClient
         .from('profiles')
         .update({ active_role: 'expert' })
         .eq('id', user.id)
 
       if (updateError) {
-        console.error('Error updating active role:', updateError)
+        console.error('Error updating active role to expert:', updateError)
         return { success: false, error: updateError.message }
       }
 

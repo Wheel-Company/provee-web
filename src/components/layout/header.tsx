@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar'
@@ -87,10 +88,17 @@ const SearchBar: React.FC = () => {
 
 const UserMenu: React.FC = () => {
   const { profile, signOut, switchRole, becomeExpert } = useUser()
+  const router = useRouter()
   const [notificationCount] = useState(3)
   const [isRoleSwitching, setIsRoleSwitching] = useState(false)
 
   if (!profile) return null
+
+  // 디버깅을 위한 로그
+  console.log('UserMenu render - profile:', profile)
+  console.log('UserMenu - user_type:', profile?.user_type)
+  console.log('UserMenu - is_expert:', profile?.is_expert)
+  console.log('UserMenu - available_roles:', profile?.available_roles)
 
   const handleRoleSwitch = async (newRole: 'customer' | 'expert') => {
     setIsRoleSwitching(true)
@@ -102,6 +110,15 @@ const UserMenu: React.FC = () => {
       }
       if (!result.success) {
         alert(`역할 전환 중 오류가 발생했습니다: ${result.error}`)
+      } else {
+        // 역할 전환 성공 시 프로필 페이지에 있다면 새로고침
+        if (window.location.pathname === '/profile') {
+          console.log('Role switched successfully, reloading page...')
+          // 강제 새로고침으로 변경
+          setTimeout(() => {
+            window.location.reload()
+          }, 500) // 약간의 딜레이 후 새로고침
+        }
       }
     } catch (error) {
       console.error('Role switch error:', error)
@@ -144,8 +161,8 @@ const UserMenu: React.FC = () => {
       </Button>
 
       {/* 역할 배지 */}
-      <Badge variant={profile.current_role === 'expert' || profile.active_role === 'expert' ? 'default' : 'secondary'}>
-        {profile.current_role === 'expert' || profile.active_role === 'expert' ? '전문가' : '고객'}
+      <Badge variant={profile.active_role === 'expert' ? 'default' : 'secondary'}>
+        {profile.active_role === 'expert' ? '전문가' : '고객'}
       </Badge>
 
       {/* 프로필 드롭다운 */}
@@ -182,7 +199,7 @@ const UserMenu: React.FC = () => {
             <p className="text-xs font-medium text-gray-500 mb-2">역할 전환</p>
 
             {/* 사용 가능한 역할 표시 */}
-            {profile.available_roles && profile.available_roles.length > 0 && (
+            {profile.available_roles && profile.available_roles.length > 1 && (
               <div className="mb-2">
                 <p className="text-xs text-gray-400">사용 가능한 역할:</p>
                 <div className="flex gap-1 mt-1">
@@ -199,9 +216,8 @@ const UserMenu: React.FC = () => {
               </div>
             )}
 
-            {/* 고객으로 전환 */}
-            {profile.available_roles?.includes('customer') &&
-             (profile.current_role === 'expert' || profile.active_role === 'expert') && (
+            {/* 고객으로 전환 - expert 등록된 사용자가 현재 expert 역할인 경우 */}
+            {profile.is_expert && profile.active_role === 'expert' && (
               <DropdownMenuItem
                 onClick={() => handleRoleSwitch('customer')}
                 disabled={isRoleSwitching}
@@ -212,9 +228,8 @@ const UserMenu: React.FC = () => {
               </DropdownMenuItem>
             )}
 
-            {/* 전문가로 전환 */}
-            {profile.available_roles?.includes('expert') &&
-             (profile.current_role === 'customer' || profile.active_role === 'customer') && (
+            {/* 전문가로 전환 - expert 등록된 사용자가 현재 customer 역할인 경우 */}
+            {profile.is_expert && profile.active_role === 'customer' && (
               <DropdownMenuItem
                 onClick={() => handleRoleSwitch('expert')}
                 disabled={isRoleSwitching}
@@ -225,8 +240,8 @@ const UserMenu: React.FC = () => {
               </DropdownMenuItem>
             )}
 
-            {/* 전문가 등록하기 */}
-            {!profile.available_roles?.includes('expert') && (
+            {/* 전문가 등록하기 (전문가 역할이 없는 경우만) */}
+            {!profile.is_expert && (
               <Link href="/expert/join/onboarding">
                 <DropdownMenuItem
                   className="text-sm text-blue-600"
@@ -235,18 +250,6 @@ const UserMenu: React.FC = () => {
                   전문가 등록하기
                 </DropdownMenuItem>
               </Link>
-            )}
-
-            {/* 고객 등록하기 (전문가만 있는 경우) */}
-            {!profile.available_roles?.includes('customer') && profile.available_roles?.includes('expert') && (
-              <DropdownMenuItem
-                onClick={() => handleRoleSwitch('customer')}
-                disabled={isRoleSwitching}
-                className="text-sm text-green-600"
-              >
-                <UserPlus className={`w-4 h-4 mr-2 ${isRoleSwitching ? 'animate-spin' : ''}`} />
-                서비스 이용하기
-              </DropdownMenuItem>
             )}
           </div>
 
@@ -283,7 +286,7 @@ const GuestActions: React.FC = () => {
 
 const Navigation: React.FC = () => {
   const { profile } = useUser()
-  const userRole = profile?.active_role || profile?.current_role || profile?.user_type
+  const userRole = profile?.active_role || profile?.user_type
   return (
     <nav className="hidden lg:flex items-center space-x-8">
       <Link href="/search">

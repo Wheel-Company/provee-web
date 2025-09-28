@@ -23,7 +23,7 @@ export default function CompletePage() {
       }
 
       // 이미 전문가인 경우 등록 완료 처리
-      if (profile.available_roles?.includes('expert') || profile.user_type === 'expert') {
+      if (profile.user_type === 'expert') {
         setRegistrationComplete(true)
         return
       }

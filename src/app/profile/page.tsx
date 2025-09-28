@@ -50,6 +50,11 @@ export default function ProfilePage() {
     loadProfileStats()
   }, [user, profile])
 
+  // 역할 변경 감지 및 자동 리렌더링
+  useEffect(() => {
+    console.log('Profile or role changed, current role:', profile?.active_role || profile?.user_type)
+  }, [profile?.active_role, profile?.user_type, profile?.available_roles])
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50">
@@ -68,8 +73,18 @@ export default function ProfilePage() {
     return null
   }
 
-  // 현재 활성 역할 감지
-  const currentRole = profile?.active_role || profile?.current_role || profile?.user_type
+  // 현재 활성 역할 확인
+  const currentRole = profile?.active_role || profile?.user_type
+
+  // 디버깅을 위한 로그
+  console.log('Profile page render:', {
+    profile,
+    currentRole,
+    active_role: profile?.active_role,
+    user_type: profile?.user_type,
+    available_roles: profile?.available_roles,
+    is_expert: profile?.is_expert
+  })
 
   return (
     <div className="min-h-screen bg-gray-50">
