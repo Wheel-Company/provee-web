@@ -111,14 +111,11 @@ const UserMenu: React.FC = () => {
       if (!result.success) {
         alert(`역할 전환 중 오류가 발생했습니다: ${result.error}`)
       } else {
-        // 역할 전환 성공 시 프로필 페이지에 있다면 새로고침
-        if (window.location.pathname === '/profile') {
-          console.log('Role switched successfully, reloading page...')
-          // 강제 새로고침으로 변경
-          setTimeout(() => {
-            window.location.reload()
-          }, 500) // 약간의 딜레이 후 새로고침
-        }
+        // 역할 전환 성공 시 헤더 메뉴 업데이트를 위해 새로고침
+        console.log('Role switched successfully, reloading page...')
+        setTimeout(() => {
+          window.location.reload()
+        }, 500) // 약간의 딜레이 후 새로고침
       }
     } catch (error) {
       console.error('Role switch error:', error)
@@ -298,17 +295,17 @@ const Navigation: React.FC = () => {
         <>
           <Link href="/request">
             <Button variant="ghost" className="text-gray-700 hover:text-blue-600">
-              요청 등록
-            </Button>
-          </Link>
-          <Link href="/profile/requests">
-            <Button variant="ghost" className="text-gray-700 hover:text-blue-600">
-              내 요청서
+              서비스 요청
             </Button>
           </Link>
           <Link href="/matching">
             <Button variant="ghost" className="text-gray-700 hover:text-blue-600">
-              매칭 현황
+              제안 현황
+            </Button>
+          </Link>
+          <Link href="/profile">
+            <Button variant="ghost" className="text-gray-700 hover:text-blue-600">
+              내 정보
             </Button>
           </Link>
         </>
@@ -317,17 +314,17 @@ const Navigation: React.FC = () => {
         <>
           <Link href="/expert">
             <Button variant="ghost" className="text-gray-700 hover:text-blue-600">
-              요청서 관리
+              요청서 보기
             </Button>
           </Link>
           <Link href="/expert/matching">
             <Button variant="ghost" className="text-gray-700 hover:text-blue-600">
-              매칭 관리
+              내 제안
             </Button>
           </Link>
           <Link href="/expert/manage">
             <Button variant="ghost" className="text-gray-700 hover:text-blue-600">
-              내 정보 관리
+              프로필 관리
             </Button>
           </Link>
         </>
